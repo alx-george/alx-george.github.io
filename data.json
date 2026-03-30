@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BC Public Sector Salary Intelligence</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0d0f14; --surface: #13161e; --surface2: #1a1e2a;
+  --border: #252a38; --accent: #c8f03a; --accent2: #3af0c8;
+  --accent3: #f03a8c; --text: #e8ecf4; --text-muted: #6b7591; --text-dim: #3d4460;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--text); font-family:'DM Mono',monospace; font-size:13px; min-height:100vh; overflow-x:hidden; }
+
+/* LOADING */
+#loading {
+  position:fixed; inset:0; background:var(--bg); display:flex;
+  flex-direction:column; align-items:center; justify-content:center; z-index:999;
+  gap:16px;
+}
+#loading .load-title { font-family:'DM Serif Display',serif; font-size:28px; color:var(--text); }
+#loading .load-sub { font-size:12px; color:var(--text-muted); letter-spacing:0.1em; }
+.load-bar { width:240px; height:2px; background:var(--border); border-radius:1px; overflow:hidden; }
+.load-fill { height:100%; background:var(--accent); border-radius:1px; animation:loadAnim 1.5s ease infinite; }
+@keyframes loadAnim { 0%{width:0;margin-left:0} 50%{width:60%;margin-left:20%} 100%{width:0;margin-left:100%} }
+
+/* HEADER */
+header { border-bottom:1px solid var(--border); padding:0 40px; display:flex; align-items:center; justify-content:space-between; height:64px; position:sticky; top:0; z-index:100; background:var(--bg); }
+.logo { font-family:'DM Serif Display',serif; font-size:20px; letter-spacing:-0.5px; }
+.logo span { color:var(--accent); }
+.logo a { color:var(--text); text-decoration:none; font-size:12px; letter-spacing:0.05em; margin-right:16px; color:var(--text-muted); transition:color 0.15s; }
+.logo a:hover { color:var(--accent); }
+nav { display:flex; gap:2px; }
+nav button { background:none; border:none; color:var(--text-muted); font-family:'DM Mono',monospace; font-size:11px; padding:8px 14px; cursor:pointer; border-radius:4px; letter-spacing:0.05em; text-transform:uppercase; transition:all 0.15s; }
+nav button:hover { color:var(--text); background:var(--surface); }
+nav button.active { color:var(--accent); background:var(--surface2); }
+
+/* PAGES */
+.page { display:none; padding:36px 40px 60px; animation:fadeIn 0.3s ease; }
+.page.active { display:block; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+
+/* KPI CARDS */
+.kpi-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--border); border:1px solid var(--border); border-radius:8px; overflow:hidden; margin-bottom:32px; }
+.kpi-card { background:var(--surface); padding:24px 28px; }
+.kpi-label { font-size:10px; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:10px; }
+.kpi-value { font-family:'DM Serif Display',serif; font-size:32px; color:var(--text); line-height:1; }
+.kpi-value.accent { color:var(--accent); }
+.kpi-sub { font-size:11px; color:var(--text-dim); margin-top:6px; }
+
+/* SECTION HEADERS */
+.section-header { display:flex; align-items:baseline; gap:12px; margin-bottom:20px; margin-top:36px; }
+.section-title { font-family:'DM Serif Display',serif; font-size:22px; color:var(--text); }
+.section-sub { font-size:11px; color:var(--text-muted); }
+
+/* CHART CONTAINERS */
+.chart-row { display:grid; gap:1px; background:var(--border); border:1px solid var(--border); border-radius:8px; overflow:hidden; margin-bottom:1px; }
+.chart-row.cols-2 { grid-template-columns:1fr 1fr; }
+.chart-row.cols-1 { grid-template-columns:1fr; }
+.chart-panel { background:var(--surface); padding:24px; }
+.chart-panel-title { font-size:10px; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:16px; }
+svg text { font-family:'DM Mono',monospace; }
+
+/* TOOLTIP */
+.tooltip { position:fixed; background:var(--surface2); border:1px solid var(--border); border-radius:6px; padding:10px 14px; font-size:12px; pointer-events:none; opacity:0; transition:opacity 0.12s; z-index:999; max-width:240px; line-height:1.6; }
+.tooltip.visible { opacity:1; }
+.tooltip-name { font-family:'DM Serif Display',serif; font-size:14px; color:var(--text); margin-bottom:4px; }
+.tooltip-row { color:var(--text-muted); }
+.tooltip-row span { color:var(--text); }
+
+/* FILTERS */
+.page-filters { display:flex; gap:8px; margin-bottom:28px; flex-wrap:wrap; align-items:center; }
+.page-filters select { background:var(--surface); border:1px solid var(--border); border-radius:4px; color:var(--text-muted); font-family:'DM Mono',monospace; font-size:11px; padding:8px 12px; outline:none; cursor:pointer; transition:border-color 0.15s; }
+.page-filters select:focus { border-color:var(--accent); }
+.filter-label { font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-dim); padding:0 4px; }
+
+/* SEARCH */
+.search-bar-wrap { position:relative; margin-bottom:16px; }
+.search-bar-wrap input { width:100%; background:var(--surface); border:1px solid var(--border); border-radius:6px; color:var(--text); font-family:'DM Mono',monospace; font-size:14px; padding:14px 48px 14px 18px; outline:none; transition:border-color 0.15s; }
+.search-bar-wrap input:focus { border-color:var(--accent); }
+.search-bar-wrap input::placeholder { color:var(--text-dim); }
+.search-icon { position:absolute; right:16px; top:50%; transform:translateY(-50%); color:var(--text-dim); font-size:18px; }
+.search-filters { display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; }
+.search-filters select { background:var(--surface); border:1px solid var(--border); border-radius:4px; color:var(--text-muted); font-family:'DM Mono',monospace; font-size:11px; padding:8px 12px; outline:none; cursor:pointer; }
+.results-count { font-size:11px; color:var(--text-dim); margin-bottom:12px; letter-spacing:0.05em; }
+
+/* TABLE */
+.results-table { width:100%; border-collapse:collapse; background:var(--surface); border-radius:8px; overflow:hidden; border:1px solid var(--border); }
+.results-table th { background:var(--surface2); padding:12px 16px; text-align:left; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-muted); font-weight:500; }
+.results-table td { padding:12px 16px; border-top:1px solid var(--border); color:var(--text); vertical-align:middle; }
+.results-table tr:hover td { background:var(--surface2); }
+.salary-cell { color:var(--accent); font-weight:500; }
+.percentile-bar-wrap { display:flex; align-items:center; gap:8px; }
+.percentile-bar { height:4px; background:var(--border); border-radius:2px; width:80px; overflow:hidden; }
+.percentile-fill { height:100%; background:var(--accent); border-radius:2px; }
+.percentile-label { font-size:11px; color:var(--text-muted); white-space:nowrap; }
+.tag { display:inline-block; background:var(--surface2); border:1px solid var(--border); border-radius:3px; padding:2px 7px; font-size:10px; color:var(--text-muted); }
+
+/* AXIS */
+.axis path,.axis line { stroke:var(--border); }
+.axis text { fill:var(--text-muted); font-size:11px; }
+.grid line { stroke:var(--border); stroke-dasharray:3,3; }
+.grid path { stroke:none; }
+
+.empty-state { text-align:center; padding:60px 20px; color:var(--text-dim); }
+.empty-state .big { font-family:'DM Serif Display',serif; font-size:28px; color:var(--text-muted); margin-bottom:8px; }
+
+::-webkit-scrollbar { width:6px; height:6px; }
+::-webkit-scrollbar-track { background:var(--bg); }
+::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+
+@media(max-width:768px) {
+  .kpi-grid { grid-template-columns:1fr 1fr; }
+  .chart-row.cols-2 { grid-template-columns:1fr; }
+  header { padding:0 20px; }
+  .page { padding:24px 20px 40px; }
+  nav button { padding:8px 10px; font-size:10px; }
+}
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="load-title">BC Salary<span style="color:var(--accent)">.</span>Intelligence</div>
+  <div class="load-bar"><div class="load-fill"></div></div>
+  <div class="load-sub">Loading 59,858 records…</div>
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<header>
+  <div class="logo">
+    <a href="../index.html">← Portfolio</a>
+    BC Salary<span>.</span>Intelligence
+  </div>
+  <nav>
+    <button class="active" onclick="showPage('overview',this)">Overview</button>
+    <button onclick="showPage('orgs',this)">Organizations</button>
+    <button onclick="showPage('roles',this)">Roles</button>
+    <button onclick="showPage('search',this)">Search</button>
+  </nav>
+</header>
+
+<!-- PAGE 1: OVERVIEW -->
+<div class="page active" id="page-overview">
+  <div class="kpi-grid" id="kpi-grid"></div>
+  <div class="section-header">
+    <div class="section-title">Salary Distribution</div>
+    <div class="section-sub">All earners above $75,000 CAD · FY 2017/18</div>
+  </div>
+  <div class="chart-row cols-2">
+    <div class="chart-panel">
+      <div class="chart-panel-title">Distribution Histogram</div>
+      <svg id="histogram"></svg>
+    </div>
+    <div class="chart-panel">
+      <div class="chart-panel-title">Salary Bands</div>
+      <svg id="bands-chart"></svg>
+    </div>
+  </div>
+  <div class="section-header">
+    <div class="section-title">By Sector</div>
+    <div class="section-sub">Median salary per classification</div>
+  </div>
+  <div class="chart-row cols-1">
+    <div class="chart-panel">
+      <div class="chart-panel-title">Sector Comparison — Median Annual Salary</div>
+      <svg id="classification-chart"></svg>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 2: ORGANIZATIONS -->
+<div class="page" id="page-orgs">
+  <div class="page-filters">
+    <div class="filter-label">Filter</div>
+    <select id="org-class-filter" onchange="renderOrgs()"><option value="all">All Sectors</option></select>
+    <select id="org-metric-filter" onchange="renderOrgs()">
+      <option value="median">Median Salary</option>
+      <option value="mean">Average Salary</option>
+      <option value="max">Highest Salary</option>
+      <option value="count">Headcount</option>
+    </select>
+  </div>
+  <div class="chart-row cols-1">
+    <div class="chart-panel">
+      <div class="chart-panel-title" id="org-chart-title">Top Organizations by Median Salary</div>
+      <svg id="org-chart"></svg>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 3: ROLES -->
+<div class="page" id="page-roles">
+  <div class="page-filters">
+    <div class="filter-label">Filter by Sector</div>
+    <select id="role-class-filter" onchange="renderRoles()"><option value="all">All Sectors</option></select>
+  </div>
+  <div class="chart-row cols-2">
+    <div class="chart-panel">
+      <div class="chart-panel-title">Top Roles by Median Salary</div>
+      <svg id="role-salary-chart"></svg>
+    </div>
+    <div class="chart-panel">
+      <div class="chart-panel-title">Role Landscape — Headcount vs. Median Salary</div>
+      <svg id="role-scatter"></svg>
+    </div>
+  </div>
+  <div class="chart-row cols-1" style="margin-top:1px">
+    <div class="chart-panel">
+      <div class="chart-panel-title">Top Roles by Headcount</div>
+      <svg id="role-count-chart"></svg>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 4: SEARCH -->
+<div class="page" id="page-search">
+  <div class="search-bar-wrap">
+    <input type="text" id="search-input" placeholder="Search by name, organization, or role…" oninput="renderSearch()">
+    <span class="search-icon">⌕</span>
+  </div>
+  <div class="search-filters">
+    <select id="search-class" onchange="renderSearch()"><option value="all">All Sectors</option></select>
+    <select id="search-org" onchange="renderSearch()"><option value="all">All Organizations</option></select>
+    <select id="search-sort" onchange="renderSearch()">
+      <option value="salary-desc">Salary: High → Low</option>
+      <option value="salary-asc">Salary: Low → High</option>
+      <option value="name-asc">Name A → Z</option>
+    </select>
+  </div>
+  <div class="results-count" id="results-count"></div>
+  <table class="results-table">
+    <thead>
+      <tr>
+        <th>Name</th><th>Organization</th><th>Sector</th>
+        <th>Role</th><th>Annual Salary</th><th>Org Percentile</th>
+      </tr>
+    </thead>
+    <tbody id="search-results"></tbody>
+  </table>
+</div>
+
+<script>
+let DATA = null;
+const fmt  = d3.format('$,.0f');
+const fmtK = v => '$' + d3.format(',.0f')(v/1000) + 'K';
+
+// ── TOOLTIP ───────────────────────────────────────────────────────
+const tooltip = document.getElementById('tooltip');
+function showTip(html,e){ tooltip.innerHTML=html; tooltip.classList.add('visible'); moveTip(e); }
+function moveTip(e){ tooltip.style.left=Math.min(e.clientX+14,window.innerWidth-250)+'px'; tooltip.style.top=(e.clientY-10)+'px'; }
+function hideTip(){ tooltip.classList.remove('visible'); }
+
+// ── LOAD DATA ─────────────────────────────────────────────────────
+fetch('./data.json')
+  .then(r => { if(!r.ok) throw new Error('Failed to load data.json'); return r.json(); })
+  .then(data => {
+    DATA = data;
+    document.getElementById('loading').style.display = 'none';
+    populateFilters();
+    renderKPIs();
+    renderHistogram();
+    renderBands();
+    renderClassification();
+  })
+  .catch(err => {
+    document.getElementById('loading').innerHTML =
+      `<div class="load-title" style="color:#f03a8c">Error</div>
+       <div class="load-sub">${err.message}</div>
+       <div class="load-sub" style="margin-top:8px;color:var(--text-dim)">Make sure data.json is in the same folder as this file.</div>`;
+  });
+
+// ── PAGE NAV ──────────────────────────────────────────────────────
+function showPage(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  btn.classList.add('active');
+  if(id==='orgs') renderOrgs();
+  if(id==='roles') renderRoles();
+  if(id==='search') renderSearch();
+}
+
+// ── POPULATE FILTERS ──────────────────────────────────────────────
+function populateFilters() {
+  const sectors = [...new Set(DATA.records.map(d=>d.c))].sort();
+  const orgs    = [...new Set(DATA.records.map(d=>d.o))].sort();
+  ['org-class-filter','role-class-filter','search-class'].forEach(id => {
+    const sel = document.getElementById(id); if(!sel) return;
+    sectors.forEach(s => { const o=document.createElement('option'); o.value=s; o.textContent=s; sel.appendChild(o); });
+  });
+  const so = document.getElementById('search-org');
+  orgs.forEach(o => { const opt=document.createElement('option'); opt.value=o; opt.textContent=o; so.appendChild(opt); });
+}
+
+// ── KPIs ──────────────────────────────────────────────────────────
+function renderKPIs() {
+  const k = DATA.kpis;
+  document.getElementById('kpi-grid').innerHTML = `
+    <div class="kpi-card"><div class="kpi-label">Total Earners</div><div class="kpi-value accent">${d3.format(',')(k.total)}</div><div class="kpi-sub">Above $75,000 CAD · FY 2017/18</div></div>
+    <div class="kpi-card"><div class="kpi-label">Median Salary</div><div class="kpi-value">${fmtK(k.median)}</div><div class="kpi-sub">Across all sectors</div></div>
+    <div class="kpi-card"><div class="kpi-label">Organisations</div><div class="kpi-value">${k.orgs}</div><div class="kpi-sub">${k.sectors} sector classifications</div></div>
+    <div class="kpi-card"><div class="kpi-label">Highest Earner</div><div class="kpi-value">${fmtK(k.max)}</div><div class="kpi-sub">${k.maxName} · ${k.maxOrg}</div></div>`;
+}
+
+// ── HISTOGRAM ─────────────────────────────────────────────────────
+function renderHistogram() {
+  const bins = DATA.histogram.filter(b=>b.count>0);
+  const svg  = d3.select('#histogram');
+  const W=460, H=240, mg={top:10,right:20,bottom:36,left:50};
+  svg.attr('width','100%').attr('height',H).attr('viewBox',`0 0 ${W} ${H}`);
+  const x = d3.scaleLinear().domain([bins[0].x0, bins[bins.length-1].x1]).range([mg.left,W-mg.right]);
+  const y = d3.scaleLinear().domain([0,d3.max(bins,b=>b.count)]).range([H-mg.bottom,mg.top]).nice();
+  svg.append('g').attr('class','grid').attr('transform',`translate(${mg.left},0)`)
+    .call(d3.axisLeft(y).tickSize(-(W-mg.left-mg.right)).tickFormat(''))
+    .call(g=>g.select('.domain').remove());
+  svg.selectAll('rect').data(bins).join('rect')
+    .attr('x',d=>x(d.x0)+1).attr('width',d=>Math.max(0,x(d.x1)-x(d.x0)-2))
+    .attr('y',d=>y(d.count)).attr('height',d=>y(0)-y(d.count))
+    .attr('fill','var(--accent)').attr('opacity',0.75).attr('rx',2)
+    .on('mouseover',(e,d)=>showTip(`<div class="tooltip-row">Range: <span>${fmtK(d.x0)}–${fmtK(d.x1)}</span></div><div class="tooltip-row">Earners: <span>${d3.format(',')(d.count)}</span></div>`,e))
+    .on('mousemove',moveTip).on('mouseleave',hideTip);
+  svg.append('g').attr('class','axis').attr('transform',`translate(0,${H-mg.bottom})`).call(d3.axisBottom(x).tickFormat(fmtK).ticks(6));
+  svg.append('g').attr('class','axis').attr('transform',`translate(${mg.left},0)`).call(d3.axisLeft(y).ticks(5));
+}
+
+// ── BANDS ─────────────────────────────────────────────────────────
+function renderBands() {
+  const bands = DATA.bands;
+  const svg   = d3.select('#bands-chart');
+  const W=460, H=240, mg={top:10,right:80,bottom:36,left:120};
+  svg.attr('width','100%').attr('height',H).attr('viewBox',`0 0 ${W} ${H}`);
+  const x = d3.scaleLinear().domain([0,d3.max(bands,b=>b.count)]).range([mg.left,W-mg.right]);
+  const y = d3.scaleBand().domain(bands.map(b=>b.label)).range([mg.top,H-mg.bottom]).padding(0.25);
+  svg.selectAll('rect').data(bands).join('rect')
+    .attr('y',d=>y(d.label)).attr('height',y.bandwidth())
+    .attr('x',mg.left).attr('width',d=>x(d.count)-mg.left)
+    .attr('fill',d=>d.color).attr('opacity',0.85).attr('rx',2)
+    .on('mouseover',(e,d)=>showTip(`<div class="tooltip-row">Band: <span>${d.label}</span></div><div class="tooltip-row">Earners: <span>${d3.format(',')(d.count)} (${Math.round(d.count/DATA.kpis.total*100)}%)</span></div>`,e))
+    .on('mousemove',moveTip).on('mouseleave',hideTip);
+  svg.selectAll('.clbl').data(bands).join('text').attr('class','clbl')
+    .attr('x',d=>x(d.count)+6).attr('y',d=>y(d.label)+y.bandwidth()/2+4)
+    .attr('fill','var(--text-muted)').attr('font-size',11).text(d=>d3.format(',')(d.count));
+  svg.append('g').attr('class','axis').attr('transform',`translate(0,${H-mg.bottom})`).call(d3.axisBottom(x).ticks(5));
+  svg.append('g').attr('class','axis').attr('transform',`translate(${mg.left},0)`).call(d3.axisLeft(y).tickSize(0)).select('.domain').remove();
+}
+
+// ── CLASSIFICATION ────────────────────────────────────────────────
+function renderClassification() {
+  const sectors = DATA.sectors;
+  const svg     = d3.select('#classification-chart');
+  const W=900, H=220, mg={top:10,right:80,bottom:36,left:200};
+  svg.attr('width','100%').attr('height',H).attr('viewBox',`0 0 ${W} ${H}`);
+  const x = d3.scaleLinear().domain([0,d3.max(sectors,d=>d.median)]).range([mg.left,W-mg.right]).nice();
+  const y = d3.scaleBand().domain(sectors.map(d=>d.label)).range([mg.top,H-mg.bottom]).padding(0.3);
+  svg.append('g').attr('class','grid').attr('transform',`translate(0,${mg.top})`)
+    .call(d3.axisTop(x).tickSize(H-mg.top-mg.bottom).tickFormat(''))
+    .call(g=>g.select('.domain').remove());
+  svg.selectAll('rect').data(sectors).join('rect')
+    .attr('y',d=>y(d.label)).attr('height',y.bandwidth())
+    .attr('x',mg.left).attr('width',d=>x(d.median)-mg.left)
+    .attr('fill','var(--accent2)').attr('opacity',0.75).attr('rx',2)
+    .on('mouseover',(e,d)=>showTip(`<div class="tooltip-name">${d.label}</div><div class="tooltip-row">Median: <span>${fmt(d.median)}</span></div><div class="tooltip-row">Mean: <span>${fmt(d.mean)}</span></div><div class="tooltip-row">Earners: <span>${d3.format(',')(d.count)}</span></div>`,e))
+    .on('mousemove',moveTip).on('mouseleave',hideTip);
+  svg.selectAll('.vlbl').data(sectors).join('text').attr('class','vlbl')
+    .attr('x',d=>x(d.median)+8).attr('y',d=>y(d.label)+y.bandwidth()/2+4)
+    .attr('fill','var(--text-muted)').attr('font-size',11).text(d=>fmtK(d.median));
+  svg.append('g').attr('class','axis').attr('transform',`translate(0,${H-mg.bottom})`).call(d3.axisBottom(x).tickFormat(fmtK).ticks(6));
+  svg.append('g').attr('class','axis').attr('transform',`translate(${mg.left},0)`).call(d3.axisLeft(y).tickSize(0)).select('.domain').remove();
+}
+
+// ── ORGS ──────────────────────────────────────────────────────────
+function renderOrgs() {
+  if(!DATA) return;
+  const cf = document.getElementById('org-class-filter').value;
+  const metric = document.getElementById('org-metric-filter').value;
+  const metricLabels = {median:'Median Salary',mean:'Average Salary',max:'Highest Salary',count:'Headcount'};
+  document.getElementById('org-chart-title').textContent = `Top Organizations by ${metricLabels[metric]}`;
+  let orgs = cf==='all' ? DATA.orgs : DATA.orgs.filter(d=>d.sector===cf);
+  orgs = [...orgs].sort((a,b)=>b[metric]-a[metric]).slice(0,25);
+  const svg = d3.select('#org-chart'); svg.selectAll('*').remove();
+  const W=900, H=Math.max(280,orgs.length*32+60), mg={top:10,right:80,bottom:36,left:230};
+  svg.attr('width','100%').attr('height',H).attr('viewBox',`0 0 ${W} ${H}`);
+  const x = d3.scaleLinear().domain([0,d3.max(orgs,d=>d[metric])]).range([mg.left,W-mg.right]).nice();
+  const y = d3.scaleBand().domain(orgs.map(d=>d.org)).range([mg.top,H-mg.bottom]).padding(0.22);
+  svg.append('g').attr('class','grid').attr('transform',`translate(0,${mg.top})`)
+    .call(d3.axisTop(x).tickSize(H-mg.top-mg.bottom).tickFormat(''))
+    .call(g=>g.select('.domain').remove());
+  svg.selectAll('rect').data(orgs).join('rect')
+    .attr('y',d=>y(d.org)).attr('height',y.bandwidth())
+    .attr('x',mg.left).attr('width',d=>x(d[metric])-mg.left)
+    .attr('fill','var(--accent)').attr('opacity',0.7).attr('rx',2)
+    .on('mouseover',(e,d)=>showTip(`<div class="tooltip-name">${d.org}</div><div class="tooltip-row">Sector: <span>${d.sector}</span></div><div class="tooltip-row">Median: <span>${fmt(d.median)}</span></div><div class="tooltip-row">Mean: <span>${fmt(Math.round(d.mean))}</span></div><div class="tooltip-row">Max: <span>${fmt(d.max)}</span></div><div class="tooltip-row">Earners: <span>${d3.format(',')(d.count)}</span></div>`,e))
+    .on('mousemove',moveTip).on('mouseleave',hideTip);
+  svg.selectAll('.vlbl').data(orgs).join('text').attr('class','vlbl')
+    .attr('x',d=>x(d[metric])+6).attr('y',d=>y(d.org)+y.bandwidth()/2+4)
+    .attr('fill','var(--text-muted)').attr('font-size',11)
+    .text(d=>metric==='count'?d3.format(',')(d.count):fmtK(d[metric]));
+  svg.append('g').attr('class','axis').attr('transform',`translate(0,${H-mg.bottom})`).call(d3.axisBottom(x).tickFormat(metric==='count'?d3.format(','):fmtK).ticks(6));
+  svg.append('g').attr('class','axis').attr('transform',`translate(${mg.left},0)`).call(d3.axisLeft(y).tickSize(0)).select('.domain').remove();
+}
+
+// ── ROLES ─────────────────────────────────────────────────────────
+function renderRoles() {
+  if(!DATA) return;
+  const cf = document.getElementById('role-class-filter').value;
+  let roles = DATA.roles;
+  if(cf!=='all') {
+    const orgSet = new Set(DATA.orgs.filter(o=>o.sector===cf).map(o=>o.org));
+    const recFiltered = DATA.records.filter(r=>r.c===cf);
+    const roleMap = {};
+    recFiltered.forEach(r => {
+      if(!roleMap[r.r]) roleMap[r.r]={sals:[],role:r.r};
+      roleMap[r.r].sals.push(r.s);
+    });
+    roles = Object.values(roleMap).filter(r=>r.sals.length>=3).map(r=>({
+      role:r.role, count:r.sals.length,
+      median:Math.round(d3.median(r.sals)),
+      mean:Math.round(d3.mean(r.sals)),
+      min:Math.min(...r.sals), max:Math.max(...r.sals)
+    }));
+  }
+  const topSalary = [...roles].sort((a,b)=>b.median-a.median).slice(0,15);
+  const topCount  = [...roles].sort((a,b)=>b.count-a.count).slice(0,15);
+  renderRoleSalaryChart(topSalary);
+  renderRoleScatter(roles.slice(0,80));
+  renderRoleCountChart(topCount);
+}
+
+function renderRoleSalaryChart(data) {
+  const svg = d3.select('#role-salary-chart'); svg.selectAll('*').remove();
+  const W=460, H=Math.max(260,data.length*28+60), mg={top:10,right:80,bottom:36,left:200};
+  svg.attr('width','100%').attr('height',H).attr('viewBox',`0 0 ${W} ${H}`);
+  const x = d3.scaleLinear().domain([0,d3.max(data,d=>d.median)]).range([mg.left,W-mg.right]).nice();
+  const y = d3.scaleBand().domain(data.map(d=>d.role)).range([mg.top,H-mg.bottom]).padding(0.25);
+  svg.selectAll('rect').data(data).join('rect')
+    .attr('y',d=>y(d.role)).attr('height',y.bandwidth())
+    .attr('x',mg.left).attr('width',d=>x(d.median)-mg.left)
+    .attr('fill','var(--accent3)').attr('opacity',0.75).attr('rx',2)
+    .on('mouseover',(e,d)=>showTip(`<div class="tooltip-name">${d.role}</div><div class="tooltip-row">Median: <span>${fmt(d.median)}</span></div><div class="tooltip-row">Range: <span>${fmtK(d.min)}–${fmtK(d.max)}</span></div><div class="tooltip-row">Count: <span>${d.count}</span></div>`,e))
+    .on('mousemove',moveTip).on('mouseleave',hideTip);
+  svg.selectAll('.lbl').data(data).join('text').attr('class','lbl')
+    .attr('x',d=>x(d.median)+6).attr('y',d=>y(d.role)+y.bandwidth()/2+4)
+    .attr('fill','var(--text-muted)').attr('font-size',10).text(d=>fmtK(d.median));
+  svg.append('g').attr('class','axis').attr('transform',`translate(0,${H-mg.bottom})`).call(d3.axisBottom(x).tickFormat(fmtK).ticks(4));
+  svg.append('g').attr('class','axis').attr('transform',`translate(${mg.left},0)`).call(d3.axisLeft(y).tickSize(0)).select('.domain').remove();
+}
+
+function renderRoleScatter(data) {
+  const svg = d3.select('#role-scatter'); svg.selectAll('*').remove();
+  const W=460, H=300, mg={top:20,right:20,bottom:40,left:60};
+  svg.attr('width','100%').attr('height',H).attr('viewBox',`0 0 ${W} ${H}`);
+  const x = d3.scaleLinear().domain([0,d3.max(data,d=>d.count)+1]).range([mg.left,W-mg.right]).nice();
+  const y = d3.scaleLinear().domain([d3.min(data,d=>d.median)*0.95,d3.max(data,d=>d.median)*1.05]).range([H-mg.bottom,mg.top]).nice();
+  svg.append('g').attr('class','grid').attr('transform',`translate(${mg.left},0)`)
+    .call(d3.axisLeft(y).tickSize(-(W-mg.left-mg.right)).tickFormat(''))
+    .call(g=>g.select('.domain').remove());
+  svg.selectAll('circle').data(data).join('circle')
+    .attr('cx',d=>x(d.count)).attr('cy',d=>y(d.median))
+    .attr('r',5).attr('fill','var(--accent2)').attr('opacity',0.65)
+    .attr('stroke','var(--bg)').attr('stroke-width',1.5)
+    .on('mouseover',(e,d)=>showTip(`<div class="tooltip-name">${d.role}</div><div class="tooltip-row">Median: <span>${fmt(d.median)}</span></div><div class="tooltip-row">Count: <span>${d.count}</span></div>`,e))
+    .on('mousemove',moveTip).on('mouseleave',hideTip);
+  data.filter(d=>d.count>50||d.median>250000).forEach(d=>{
+    svg.append('text').attr('x',x(d.count)+7).attr('y',y(d.median)+4)
+      .attr('fill','var(--text-dim)').attr('font-size',9)
+      .text(d.role.length>18?d.role.slice(0,18)+'…':d.role);
+  });
+  svg.append('g').attr('class','axis').attr('transform',`translate(0,${H-mg.bottom})`).call(d3.axisBottom(x).ticks(5).tickFormat(d3.format('d')));
+  svg.append('g').attr('class','axis').attr('transform',`translate(${mg.left},0)`).call(d3.axisLeft(y).tickFormat(fmtK).ticks(5));
+  svg.append('text').attr('x',(W+mg.left-mg.right)/2).attr('y',H-4)
+    .attr('text-anchor','middle').attr('fill','var(--text-dim)').attr('font-size',10).text('Headcount');
+  svg.append('text').attr('transform','rotate(-90)').attr('x',-(H-mg.bottom+mg.top)/2).attr('y',14)
+    .attr('text-anchor','middle').attr('fill','var(--text-dim)').attr('font-size',10).text('Median Salary');
+}
+
+function renderRoleCountChart(data) {
+  const svg = d3.select('#role-count-chart'); svg.selectAll('*').remove();
+  const W=900, H=Math.max(200,data.length*28+60), mg={top:10,right:80,bottom:36,left:240};
+  svg.attr('width','100%').attr('height',H).attr('viewBox',`0 0 ${W} ${H}`);
+  const x = d3.scaleLinear().domain([0,d3.max(data,d=>d.count)]).range([mg.left,W-mg.right]).nice();
+  const y = d3.scaleBand().domain(data.map(d=>d.role)).range([mg.top,H-mg.bottom]).padding(0.25);
+  svg.selectAll('rect').data(data).join('rect')
+    .attr('y',d=>y(d.role)).attr('height',y.bandwidth())
+    .attr('x',mg.left).attr('width',d=>x(d.count)-mg.left)
+    .attr('fill','var(--accent2)').attr('opacity',0.65).attr('rx',2)
+    .on('mouseover',(e,d)=>showTip(`<div class="tooltip-name">${d.role}</div><div class="tooltip-row">Count: <span>${d3.format(',')(d.count)}</span></div><div class="tooltip-row">Median: <span>${fmt(d.median)}</span></div>`,e))
+    .on('mousemove',moveTip).on('mouseleave',hideTip);
+  svg.selectAll('.clbl').data(data).join('text').attr('class','clbl')
+    .attr('x',d=>x(d.count)+6).attr('y',d=>y(d.role)+y.bandwidth()/2+4)
+    .attr('fill','var(--text-muted)').attr('font-size',11).text(d=>d3.format(',')(d.count));
+  svg.append('g').attr('class','axis').attr('transform',`translate(0,${H-mg.bottom})`).call(d3.axisBottom(x).ticks(5).tickFormat(d3.format(',d')));
+  svg.append('g').attr('class','axis').attr('transform',`translate(${mg.left},0)`).call(d3.axisLeft(y).tickSize(0)).select('.domain').remove();
+}
+
+// ── SEARCH ────────────────────────────────────────────────────────
+function renderSearch() {
+  if(!DATA) return;
+  const q   = document.getElementById('search-input').value.toLowerCase().trim();
+  const cf  = document.getElementById('search-class').value;
+  const of  = document.getElementById('search-org').value;
+  const srt = document.getElementById('search-sort').value;
+  let res = DATA.records.filter(d => {
+    if(cf!=='all' && d.c!==cf) return false;
+    if(of!=='all' && d.o!==of) return false;
+    if(q) return d.n.toLowerCase().includes(q)||d.o.toLowerCase().includes(q)||d.r.toLowerCase().includes(q);
+    return true;
+  });
+  if(srt==='salary-desc') res.sort((a,b)=>b.s-a.s);
+  else if(srt==='salary-asc') res.sort((a,b)=>a.s-b.s);
+  else res.sort((a,b)=>a.n.localeCompare(b.n));
+  document.getElementById('results-count').textContent = `${d3.format(',')(res.length)} result${res.length!==1?'s':''} found`;
+  const tbody = document.getElementById('search-results');
+  if(!res.length) {
+    tbody.innerHTML=`<tr><td colspan="6"><div class="empty-state"><div class="big">No results</div>Try a different search or filter.</div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = res.slice(0,200).map(d=>`
+    <tr>
+      <td>${d.n}</td>
+      <td>${d.o}</td>
+      <td><span class="tag">${d.c}</span></td>
+      <td>${d.r}</td>
+      <td class="salary-cell">${fmt(d.s)}</td>
+      <td>
+        <div class="percentile-bar-wrap">
+          <div class="percentile-bar"><div class="percentile-fill" style="width:${d.p}%"></div></div>
+          <span class="percentile-label">Top ${100-d.p}% in org</span>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+</script>
+</body>
+</html>

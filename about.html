@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Alx Report — Data & Analytics</title>
+<link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,300;1,8..60,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #f7f4ef;
+  --ink: #121212;
+  --ink-mid: #444;
+  --ink-light: #888;
+  --ink-xlight: #bbb;
+  --rule: #d0cbc4;
+  --rule-heavy: #999;
+  --accent: #c0001a;
+  --surface: #eeeae3;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Libre Baskerville', Georgia, serif;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* ── MASTHEAD TOP ─────────────────────────────────────────────── */
+.masthead-top {
+  border-bottom: 1px solid var(--rule);
+  padding: 9px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'Source Serif 4', serif;
+  font-size: 11px;
+  color: var(--ink-light);
+  letter-spacing: 0.04em;
+}
+
+.masthead-nav-top {
+  display: flex;
+  gap: 24px;
+}
+
+.masthead-nav-top a {
+  color: var(--ink-light);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.masthead-nav-top a:hover { color: var(--ink); }
+
+/* ── MASTHEAD CENTER ──────────────────────────────────────────── */
+.masthead-center {
+  text-align: center;
+  padding: 24px 40px 0;
+}
+
+.masthead-dateline {
+  font-family: 'Source Serif 4', serif;
+  font-size: 11px;
+  color: var(--ink-light);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.masthead-title {
+  font-family: 'UnifrakturMaguntia', cursive;
+  font-size: clamp(56px, 9vw, 104px);
+  line-height: 1;
+  color: var(--ink);
+  letter-spacing: -1px;
+  margin-bottom: 8px;
+}
+
+.masthead-subtitle {
+  font-family: 'Source Serif 4', serif;
+  font-style: italic;
+  font-size: 13px;
+  color: var(--ink-mid);
+  margin-bottom: 16px;
+  letter-spacing: 0.02em;
+}
+
+.triple-rule {
+  border-top: 3px double var(--ink);
+  border-bottom: 3px double var(--ink);
+  height: 6px;
+  margin: 0 -40px;
+}
+
+/* ── SECTION NAV ──────────────────────────────────────────────── */
+.section-nav {
+  border-bottom: 1px solid var(--rule);
+  display: flex;
+  justify-content: center;
+  overflow-x: auto;
+}
+
+.section-nav a {
+  font-family: 'Source Serif 4', serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink);
+  text-decoration: none;
+  padding: 10px 22px;
+  border-right: 1px solid var(--rule);
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+}
+
+.section-nav a:first-child { border-left: 1px solid var(--rule); }
+.section-nav a:hover { background: var(--ink); color: var(--paper); }
+
+/* ── PAGE WRAPPER ─────────────────────────────────────────────── */
+.page-wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+.vr { width: 1px; background: var(--rule); }
+
+/* ── HERO ─────────────────────────────────────────────────────── */
+.hero-grid {
+  display: grid;
+  grid-template-columns: 220px 1px 1fr 1px 220px;
+  min-height: 520px;
+  padding: 32px 0 0;
+  border-bottom: 3px double var(--rule);
+}
+
+/* Left sidebar */
+.hero-sidebar-left {
+  padding-right: 28px;
+  padding-bottom: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.sidebar-hed {
+  font-family: 'Source Serif 4', serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink);
+  border-bottom: 2px solid var(--ink);
+  padding-bottom: 6px;
+  margin-bottom: 0;
+}
+
+.stat-block {
+  border-bottom: 1px solid var(--rule);
+  padding: 14px 0;
+}
+
+.stat-num {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 38px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1;
+  letter-spacing: -1.5px;
+}
+
+.stat-lbl {
+  font-family: 'Source Serif 4', serif;
+  font-size: 11px;
+  color: var(--ink-light);
+  font-style: italic;
+  margin-top: 3px;
+  line-height: 1.4;
+}
+
+/* Center lead */
+.hero-lead {
+  padding: 0 36px 32px;
+}
+
+.kicker {
+  font-family: 'Source Serif 4', serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.kicker::before {
+  content: '';
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: var(--accent);
+  flex-shrink: 0;
+}
+
+.lead-hed {
+  font-family: 'Libre Baskerville', serif;
+  font-size: clamp(30px, 3.5vw, 50px);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -1px;
+  color: var(--ink);
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 12px;
+  margin-bottom: 10px;
+}
+
+.lead-byline {
+  font-family: 'Source Serif 4', serif;
+  font-size: 11px;
+  color: var(--ink-light);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 18px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.lead-byline span { color: var(--ink-mid); }
+
+.lead-body {
+  font-family: 'Source Serif 4', serif;
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--ink-mid);
+  column-count: 2;
+  column-gap: 28px;
+  column-rule: 1px solid var(--rule);
+}
+
+.lead-body p { margin-bottom: 14px; break-inside: avoid; }
+
+.lead-body .drop-cap::first-letter {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 68px;
+  font-weight: 700;
+  float: left;
+  line-height: 0.82;
+  margin: 6px 8px 0 0;
+  color: var(--ink);
+}
+
+.pull-quote {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 17px;
+  font-style: italic;
+  line-height: 1.45;
+  color: var(--ink);
+  border-top: 3px solid var(--ink);
+  border-bottom: 1px solid var(--rule);
+  padding: 14px 0 12px;
+  margin: 20px 0;
+  column-span: all;
+  text-align: center;
+}
+
+/* Right sidebar */
+.hero-sidebar-right {
+  padding-left: 28px;
+  padding-bottom: 32px;
+}
+
+.briefing-item {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.briefing-label {
+  font-family: 'Source Serif 4', serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+
+.briefing-title {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--ink);
+  margin-bottom: 3px;
+}
+
+.briefing-desc {
+  font-family: 'Source Serif 4', serif;
+  font-size: 12px;
+  color: var(--ink-mid);
+  line-height: 1.5;
+  font-style: italic;
+}
+
+/* ── SECTION DIVIDERS ─────────────────────────────────────────── */
+.section-rule {
+  display: flex;
+  align-items: center;
+  padding: 28px 0 22px;
+}
+
+.section-rule-label {
+  font-family: 'Source Serif 4', serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink);
+  white-space: nowrap;
+  padding: 0 14px;
+  background: var(--paper);
+}
+
+.section-rule-line { flex: 1; height: 1px; background: var(--ink); }
+
+/* ── PROJECTS ─────────────────────────────────────────────────── */
+.stories-grid {
+  display: grid;
+  grid-template-columns: 2fr 1px 1fr 1px 1fr;
+  padding-bottom: 36px;
+  border-bottom: 3px double var(--rule);
+  gap: 0;
+}
+
+.story-col-main { padding-right: 32px; }
+.story-col-mid  { padding: 0 28px; }
+.story-col-side { padding-left: 28px; }
+
+.story-hed {
+  font-family: 'Libre Baskerville', serif;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.4px;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+
+.story-hed a { color: inherit; text-decoration: none; transition: color 0.15s; }
+.story-hed a:hover { color: var(--accent); }
+
+.story-hed.lg { font-size: 28px; letter-spacing: -0.7px; }
+.story-hed.md { font-size: 18px; }
+.story-hed.sm { font-size: 15px; }
+
+.story-dek {
+  font-family: 'Source Serif 4', serif;
+  font-size: 13px;
+  color: var(--ink-mid);
+  line-height: 1.65;
+  margin-bottom: 10px;
+  font-style: italic;
+}
+
+.story-byline {
+  font-family: 'Source Serif 4', serif;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-light);
+  margin-top: 8px;
+}
+
+.story-divider {
+  border-top: 1px solid var(--rule);
+  margin: 20px 0;
+}
+
+.story-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin: 10px 0;
+}
+
+.story-tag {
+  font-family: 'Source Serif 4', serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-mid);
+  border: 1px solid var(--rule-heavy);
+  padding: 2px 7px;
+}
+
+.story-tag.red { color: var(--accent); border-color: var(--accent); }
+
+/* ── ABOUT / SKILLS / EXP ─────────────────────────────────────── */
+.three-col {
+  display: grid;
+  grid-template-columns: 1fr 1px 1fr 1px 1fr;
+  gap: 0;
+  padding-bottom: 40px;
+  border-bottom: 3px double var(--rule);
+}
+
+.three-col-item { padding: 0 32px; }
+.three-col-item:first-child { padding-left: 0; }
+.three-col-item:last-child  { padding-right: 0; }
+
+.col-hed {
+  font-family: 'Source Serif 4', serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink);
+  border-bottom: 2px solid var(--ink);
+  padding-bottom: 6px;
+  margin-bottom: 16px;
+}
+
+.body-text {
+  font-family: 'Source Serif 4', serif;
+  font-size: 14px;
+  line-height: 1.82;
+  color: var(--ink-mid);
+}
+
+.body-text p { margin-bottom: 14px; }
+.body-text strong { color: var(--ink); font-weight: 600; }
+
+.row-list { list-style: none; }
+
+.row-list li {
+  font-family: 'Source Serif 4', serif;
+  font-size: 13px;
+  color: var(--ink-mid);
+  padding: 9px 0;
+  border-bottom: 1px solid var(--rule);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.row-list li:last-child { border-bottom: none; }
+
+.badge {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+}
+
+.badge.earned { color: var(--accent); border: 1px solid var(--accent); }
+.badge.progress { color: var(--ink-xlight); border: 1px solid var(--ink-xlight); }
+.badge.advanced { color: var(--ink-mid); border: 1px solid var(--rule-heavy); }
+
+.timeline { list-style: none; }
+
+.tl-item {
+  padding: 12px 0 12px 16px;
+  border-bottom: 1px solid var(--rule);
+  position: relative;
+}
+
+.tl-item:last-child { border-bottom: none; }
+
+.tl-item::before {
+  content: '◆';
+  position: absolute;
+  left: 0; top: 14px;
+  font-size: 6px;
+  color: var(--accent);
+}
+
+.tl-date {
+  font-family: 'Source Serif 4', serif;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-light);
+  margin-bottom: 2px;
+}
+
+.tl-title {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 1px;
+}
+
+.tl-org {
+  font-family: 'Source Serif 4', serif;
+  font-size: 12px;
+  font-style: italic;
+  color: var(--ink-mid);
+}
+
+/* ── CONTACT ──────────────────────────────────────────────────── */
+.contact-wrap {
+  display: grid;
+  grid-template-columns: 1fr 1px 1fr;
+  gap: 0;
+  padding-bottom: 48px;
+}
+
+.contact-left { padding-right: 48px; }
+.contact-right { padding-left: 48px; }
+
+.contact-hed {
+  font-family: 'Libre Baskerville', serif;
+  font-size: clamp(26px, 3.5vw, 44px);
+  font-weight: 700;
+  font-style: italic;
+  line-height: 1.15;
+  letter-spacing: -0.8px;
+  color: var(--ink);
+  margin-bottom: 16px;
+}
+
+.contact-dek {
+  font-family: 'Source Serif 4', serif;
+  font-size: 14px;
+  color: var(--ink-mid);
+  line-height: 1.8;
+  font-style: italic;
+}
+
+.link-list { list-style: none; }
+
+.link-list li { border-bottom: 1px solid var(--rule); }
+.link-list li:first-child { border-top: 1px solid var(--rule); }
+
+.link-list a {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 0;
+  text-decoration: none;
+  color: var(--ink);
+  transition: padding-left 0.15s, color 0.15s;
+}
+
+.link-list a:hover { padding-left: 8px; color: var(--accent); }
+
+.link-label {
+  font-family: 'Source Serif 4', serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-light);
+  display: block;
+  margin-bottom: 2px;
+}
+
+.link-val {
+  font-family: 'Source Serif 4', serif;
+  font-size: 14px;
+}
+
+.link-arrow { font-size: 16px; color: var(--ink-light); transition: all 0.15s; }
+.link-list a:hover .link-arrow { color: var(--accent); transform: translate(2px,-2px); }
+
+/* ── FOOTER ───────────────────────────────────────────────────── */
+footer {
+  border-top: 3px double var(--ink);
+  padding: 18px 40px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 16px;
+}
+
+.footer-l {
+  font-family: 'Source Serif 4', serif;
+  font-size: 11px;
+  color: var(--ink-light);
+}
+
+.footer-c {
+  font-family: 'UnifrakturMaguntia', cursive;
+  font-size: 24px;
+  color: var(--ink);
+  text-align: center;
+}
+
+.footer-r {
+  font-family: 'Source Serif 4', serif;
+  font-size: 11px;
+  color: var(--ink-light);
+  text-align: right;
+}
+
+/* ── REVEAL ANIMATION ─────────────────────────────────────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.55s ease, transform 0.55s ease;
+}
+.reveal.visible { opacity: 1; transform: none; }
+
+/* ── RESPONSIVE ───────────────────────────────────────────────── */
+@media (max-width: 880px) {
+  .hero-grid,
+  .stories-grid,
+  .three-col,
+  .contact-wrap { grid-template-columns: 1fr; }
+  .vr { display: none; }
+  .hero-sidebar-left,
+  .hero-lead,
+  .hero-sidebar-right,
+  .story-col-main,
+  .story-col-mid,
+  .story-col-side,
+  .three-col-item,
+  .contact-left,
+  .contact-right { padding: 0 0 28px 0; border-bottom: 1px solid var(--rule); }
+  .lead-body { column-count: 1; }
+  .masthead-nav-top { display: none; }
+  .page-wrap { padding: 0 20px; }
+  footer { grid-template-columns: 1fr; text-align: center; }
+  .footer-r { text-align: center; }
+  .triple-rule { margin: 0 -20px; }
+}
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--paper); }
+::-webkit-scrollbar-thumb { background: var(--rule); }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="masthead-top">
+  <div id="dateline">Vancouver, B.C.</div>
+  <nav class="masthead-nav-top">
+    <a href="#projects">Projects</a>
+    <a href="#about">About</a>
+    <a href="#experience">Experience</a>
+    <a href="#contact">Contact</a>
+  </nav>
+  <div>Data &amp; Analytics Portfolio</div>
+</div>
+
+<!-- MASTHEAD -->
+<div class="masthead-center page-wrap">
+  <div class="masthead-dateline">Est. Vancouver, BC &nbsp;·&nbsp; UBC Master of Business Analytics, 2024 &nbsp;·&nbsp; Power BI · Tableau · D3.js</div>
+  <div class="masthead-title">The Alx Report</div>
+  <div class="masthead-subtitle">Data Analysis &nbsp;·&nbsp; Business Intelligence &nbsp;·&nbsp; Visual Analytics</div>
+</div>
+<div class="triple-rule page-wrap" style="margin: 0 auto; max-width: 1200px; padding: 0 40px;">
+  <div style="border-top: 2px solid var(--ink); border-bottom: 1px solid var(--ink); height: 5px;"></div>
+</div>
+
+<!-- SECTION NAV -->
+<div class="section-nav">
+  <a href="#projects">Projects</a>
+  <a href="#about">About</a>
+  <a href="#skills">Skills</a>
+  <a href="#experience">Experience</a>
+  <a href="#contact">Contact</a>
+</div>
+
+<div class="page-wrap">
+
+  <!-- HERO -->
+  <div class="hero-grid reveal">
+
+    <!-- Left: Stats -->
+    <div class="hero-sidebar-left">
+      <div class="sidebar-hed">At a Glance</div>
+      <div class="stat-block">
+        <div class="stat-num">MBAn</div>
+        <div class="stat-lbl">UBC Master of Business Analytics · 2024</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-num">2×</div>
+        <div class="stat-lbl">Certified — Power BI (PL-300) &amp; Tableau Desktop</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-num">60K</div>
+        <div class="stat-lbl">Salary records processed for BC Public Sector Dashboard</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-num">5+</div>
+        <div class="stat-lbl">Fiscal years of BC SOFI data extracted &amp; modelled</div>
+      </div>
+    </div>
+
+    <div class="vr"></div>
+
+    <!-- Center: Lead story -->
+    <div class="hero-lead">
+      <div class="kicker">Lead Story</div>
+      <h1 class="lead-hed">A Vancouver Analyst Making British Columbia's Public Data Legible — One Dataset at a Time</h1>
+      <div class="lead-byline">By <span>Alx</span> &nbsp;·&nbsp; Vancouver, British Columbia &nbsp;·&nbsp; Open to Analyst Roles</div>
+
+      <div class="lead-body">
+        <p class="drop-cap">Vancouver-based analyst with a Master of Business Analytics from UBC has spent the better part of two years turning British Columbia's most complex public datasets into tools anyone can understand — dashboards that don't just display numbers, but tell the story behind them.</p>
+
+        <p>The work spans health authorities, crown corporations, school districts, transit agencies, and universities — drawing on Statement of Financial Information reports, BC Open Data portals, and the Vancouver Sun's public sector salary database to build intelligence tools for public accountability.</p>
+
+        <div class="pull-quote">"The data exists. The question is whether anyone has made it legible."</div>
+
+        <p>Armed with Power BI, Tableau, D3.js, and Python, the analyst has built automated PDF extraction pipelines, vendor enrichment systems using the Claude API and BC Registry lookups, and interactive dashboards featuring drill-through profiles, spend segmentation, and anomaly detection.</p>
+
+        <p>Currently exploring the frontier of agentic AI in business intelligence — where language models, Python, and BI tools collaborate to produce insight without human intervention at every step.</p>
+      </div>
+    </div>
+
+    <div class="vr"></div>
+
+    <!-- Right: Briefing -->
+    <div class="hero-sidebar-right">
+      <div class="sidebar-hed">In Brief</div>
+      <div class="briefing-item">
+        <div class="briefing-label">BC Public Sector</div>
+        <div class="briefing-title">60,000 salary records mapped across 6 sectors</div>
+        <div class="briefing-desc">Interactive D3.js dashboard with search, org benchmarking &amp; percentile ranking.</div>
+      </div>
+      <div class="briefing-item">
+        <div class="briefing-label">Vendor Intelligence</div>
+        <div class="briefing-title">BC Hydro, TransLink, PHSA &amp; BCIT supplier data unified</div>
+        <div class="briefing-desc">Power BI semantic model built from PDF extraction with AI-assisted enrichment.</div>
+      </div>
+      <div class="briefing-item">
+        <div class="briefing-label">Housing Research</div>
+        <div class="briefing-title">Are we building enough housing in BC?</div>
+        <div class="briefing-desc">Four-phase framework across 29 regional districts using BC New Homes Registry.</div>
+      </div>
+      <div class="briefing-item">
+        <div class="briefing-label">Certifications</div>
+        <div class="briefing-title">PMP &amp; ECBA in progress</div>
+        <div class="briefing-desc">Adding PM &amp; business analysis credentials to a technical BI foundation.</div>
+      </div>
+    </div>
+
+  </div><!-- end hero-grid -->
+
+  <!-- PROJECTS -->
+  <div id="projects">
+    <div class="section-rule">
+      <div class="section-rule-line"></div>
+      <div class="section-rule-label">Projects</div>
+      <div class="section-rule-line"></div>
+    </div>
+
+    <div class="stories-grid reveal">
+
+      <div class="story-col-main">
+        <div class="kicker">Featured Project</div>
+        <h2 class="story-hed lg"><a href="./bc-salary/dashboard.html">BC Public Sector Salary Intelligence Dashboard</a></h2>
+        <p class="story-dek">An interactive exploration of 60,000+ salary records drawn from the Vancouver Sun's Public Sector Salary Database — covering health authorities, crown corporations, school districts, universities, and government agencies across British Columbia. Features organisation benchmarking, role-level scatter analysis, salary band distribution, and a full-text individual search with percentile ranking.</p>
+        <div class="story-tags">
+          <span class="story-tag red">Live Dashboard</span>
+          <span class="story-tag">D3.js</span>
+          <span class="story-tag">Python</span>
+          <span class="story-tag">BC Open Data</span>
+          <span class="story-tag">60K Records</span>
+          <span class="story-tag">FY 2017/18</span>
+        </div>
+        <div class="story-byline">Vancouver Sun PSSDB · BC Open Government Data</div>
+      </div>
+
+      <div class="vr"></div>
+
+      <div class="story-col-mid">
+        <div class="kicker">Power BI</div>
+        <h3 class="story-hed md"><a href="#">BC Supplier Intelligence — Four-Org Vendor Analytics</a></h3>
+        <p class="story-dek">BC Hydro, TransLink, PHSA, and BCIT supplier spend unified in a single Power BI semantic model. Built from SOFI PDF reports using pdfplumber and enriched via Claude API and BC Registry lookups.</p>
+        <div class="story-tags">
+          <span class="story-tag">Power BI</span>
+          <span class="story-tag">DAX</span>
+          <span class="story-tag">Claude API</span>
+          <span class="story-tag">PDF Extraction</span>
+        </div>
+
+        <div class="story-divider"></div>
+
+        <div class="kicker">Power BI</div>
+        <h3 class="story-hed md"><a href="#">UBC Supplier Intelligence Dashboard</a></h3>
+        <p class="story-dek">Vendor payment analysis across UBC SOFI reports FY2021–2025. 6,700+ rows, 9 categories, and scatter plot segmentation with full semantic model.</p>
+        <div class="story-tags">
+          <span class="story-tag">Power BI</span>
+          <span class="story-tag">Python</span>
+          <span class="story-tag">DAX</span>
+        </div>
+      </div>
+
+      <div class="vr"></div>
+
+      <div class="story-col-side">
+        <div class="kicker">Housing Research</div>
+        <h3 class="story-hed md"><a href="#">Are We Building Enough Housing in BC?</a></h3>
+        <p class="story-dek">Power BI dashboard and four-phase research framework across BC's 29 regional districts using BC New Homes Registry data.</p>
+        <div class="story-tags">
+          <span class="story-tag">Power BI</span>
+          <span class="story-tag">Housing</span>
+          <span class="story-tag">Research</span>
+        </div>
+
+        <div class="story-divider"></div>
+
+        <div class="kicker">Data Pipeline</div>
+        <h3 class="story-hed md"><a href="#">YVR Flight Data Pipeline</a></h3>
+        <p class="story-dek">GitHub Actions + AviationStack API + Google Sheets + Power BI automated pipeline for YVR airport analytics.</p>
+        <div class="story-tags">
+          <span class="story-tag">GitHub Actions</span>
+          <span class="story-tag">Python</span>
+          <span class="story-tag">Power BI</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ABOUT + SKILLS + EXPERIENCE -->
+  <div id="about">
+    <div class="section-rule">
+      <div class="section-rule-line"></div>
+      <div class="section-rule-label">About &amp; Background</div>
+      <div class="section-rule-line"></div>
+    </div>
+
+    <div class="three-col reveal" id="skills">
+
+      <div class="three-col-item" style="padding-left:0;">
+        <div class="col-hed">The Analyst</div>
+        <div class="body-text">
+          <p>Vancouver-based data analyst specialising in <strong>business intelligence, public sector data, and visual analytics</strong>. Graduate of UBC's Master of Business Analytics programme, class of 2024.</p>
+          <p>My work sits at the intersection of technical rigour and clear communication — building dashboards that don't just show numbers, but make them matter to the people who rely on them.</p>
+          <p>I'm drawn to <strong>BC public sector data</strong> — housing, transit, health, education — because the stakes are real and the datasets reward serious analysis. Every project in this portfolio uses government open data to build something genuinely useful.</p>
+          <p>Currently deepening expertise in <strong>agentic AI workflows</strong> in BI — pipelines where Claude, Python, and Power BI collaborate autonomously to produce insight at scale.</p>
+        </div>
+      </div>
+
+      <div class="vr"></div>
+
+      <div class="three-col-item" id="experience-anchor">
+        <div class="col-hed">Technical Skills</div>
+        <ul class="row-list">
+          <li>Power BI (PL-300) <span class="badge earned">Certified</span></li>
+          <li>Tableau Desktop <span class="badge earned">Certified</span></li>
+          <li>D3.js &amp; Chart.js <span class="badge advanced">Practitioner</span></li>
+          <li>Python &amp; pandas <span class="badge advanced">Practitioner</span></li>
+          <li>DAX &amp; Power Query <span class="badge advanced">Advanced</span></li>
+          <li>SQL <span class="badge advanced">Practitioner</span></li>
+          <li>PMP <span class="badge progress">In Progress</span></li>
+          <li>ECBA <span class="badge progress">In Progress</span></li>
+        </ul>
+        <div style="margin-top: 24px;">
+          <div class="col-hed">Domain Focus</div>
+          <ul class="row-list">
+            <li>BC Public Sector Analytics</li>
+            <li>Housing &amp; Real Estate Data</li>
+            <li>Transit &amp; Infrastructure</li>
+            <li>Health Authority Data</li>
+            <li>Vendor &amp; Spend Intelligence</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="vr"></div>
+
+      <div class="three-col-item" style="padding-right:0;" id="experience">
+        <div class="col-hed">Experience &amp; Education</div>
+        <ul class="timeline">
+          <li class="tl-item">
+            <div class="tl-date">2024 · Vancouver</div>
+            <div class="tl-title">Master of Business Analytics</div>
+            <div class="tl-org">University of British Columbia (UBC)</div>
+          </li>
+          <li class="tl-item">
+            <div class="tl-date">2024–25 · Self-directed</div>
+            <div class="tl-title">Independent Analytics Researcher</div>
+            <div class="tl-org">BC Public Sector Data Projects</div>
+          </li>
+          <li class="tl-item">
+            <div class="tl-date">2024 · Applied</div>
+            <div class="tl-title">Research Analyst Application</div>
+            <div class="tl-org">BC Housing</div>
+          </li>
+          <li class="tl-item">
+            <div class="tl-date">2024 · Earned</div>
+            <div class="tl-title">Power BI Data Analyst (PL-300)</div>
+            <div class="tl-org">Microsoft Certification</div>
+          </li>
+          <li class="tl-item">
+            <div class="tl-date">2024 · Earned</div>
+            <div class="tl-title">Tableau Desktop Specialist</div>
+            <div class="tl-org">Tableau Certification</div>
+          </li>
+          <li class="tl-item">
+            <div class="tl-date">In Progress</div>
+            <div class="tl-title">PMP &amp; ECBA</div>
+            <div class="tl-org">PMI · IIBA</div>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- CONTACT -->
+  <div id="contact">
+    <div class="section-rule">
+      <div class="section-rule-line"></div>
+      <div class="section-rule-label">Contact</div>
+      <div class="section-rule-line"></div>
+    </div>
+
+    <div class="contact-wrap reveal">
+      <div class="contact-left">
+        <div class="contact-hed">Open to analyst roles in British Columbia.</div>
+        <p class="contact-dek">Particularly interested in public sector, research, and BI-focused positions where data can drive meaningful decisions. Based in Vancouver — available immediately.</p>
+      </div>
+
+      <div class="vr"></div>
+
+      <div class="contact-right">
+        <ul class="link-list">
+          <li>
+            <a href="/cdn-cgi/l/email-protection#5e27312b2c1e3b333f3732703d3133">
+              <div><span class="link-label">Email</span><span class="link-val"><span class="__cf_email__" data-cfemail="ccb5a3b9be8ca9a1ada5a0e2afa3a1">[email&#160;protected]</span></span></div>
+              <span class="link-arrow">↗</span>
+            </a>
+          </li>
+          <li>
+            <a href="https://linkedin.com/in/yourprofile" target="_blank">
+              <div><span class="link-label">LinkedIn</span><span class="link-val">linkedin.com/in/yourprofile</span></div>
+              <span class="link-arrow">↗</span>
+            </a>
+          </li>
+          <li>
+            <a href="https://github.com/yourusername" target="_blank">
+              <div><span class="link-label">GitHub</span><span class="link-val">github.com/yourusername</span></div>
+              <span class="link-arrow">↗</span>
+            </a>
+          </li>
+          <li>
+            <a href="./resume.pdf">
+              <div><span class="link-label">Résumé</span><span class="link-val">Download PDF</span></div>
+              <span class="link-arrow">↗</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end page-wrap -->
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-l">Vancouver, BC · 2025 · Built with open data</div>
+  <div class="footer-c">The Alx Report</div>
+  <div class="footer-r">Data &amp; Analytics Portfolio</div>
+</footer>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// Live dateline
+const d = new Date();
+const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+document.getElementById('dateline').textContent =
+  `Vancouver, B.C. · ${days[d.getDay()]}, ${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+
+// Scroll reveal
+const obs = new IntersectionObserver((entries) => {
+  entries.forEach((e, i) => {
+    if (e.isIntersecting) {
+      setTimeout(() => e.target

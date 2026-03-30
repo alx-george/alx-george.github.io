@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BC Public Sector Salary Dashboard — Case Study</title>
+<link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,300;1,8..60,400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<style>
+:root {
+  --paper: #f7f4ef;
+  --ink: #121212;
+  --ink-mid: #444;
+  --ink-light: #888;
+  --ink-xlight: #bbb;
+  --rule: #d0cbc4;
+  --rule-heavy: #999;
+  --accent: #c0001a;
+  --surface: #eeeae3;
+  --surface2: #e5e0d8;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+/* ── MASTHEAD ─────────────────────────────────────────────────── */
+.masthead {
+  border-bottom: 1px solid var(--rule);
+  padding: 10px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  color: var(--ink-light);
+  letter-spacing: 0.05em;
+}
+
+.masthead-logo {
+  font-family: 'UnifrakturMaguntia', cursive;
+  font-size: 22px;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.masthead-back {
+  color: var(--ink-light);
+  text-decoration: none;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: color 0.15s;
+}
+
+.masthead-back:hover { color: var(--accent); }
+
+/* ── ARTICLE HEADER ───────────────────────────────────────────── */
+.article-header {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 48px 40px 0;
+  border-bottom: 3px double var(--rule);
+  padding-bottom: 36px;
+}
+
+.article-section-tag {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.article-section-tag::before {
+  content: '';
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: var(--accent);
+}
+
+.article-hed {
+  font-family: 'Libre Baskerville', serif;
+  font-size: clamp(32px, 4.5vw, 58px);
+  font-weight: 700;
+  line-height: 1.06;
+  letter-spacing: -1.5px;
+  color: var(--ink);
+  margin-bottom: 16px;
+}
+
+.article-dek {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 18px;
+  font-style: italic;
+  font-weight: 400;
+  color: var(--ink-mid);
+  line-height: 1.5;
+  margin-bottom: 20px;
+  max-width: 680px;
+}
+
+.article-meta {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  padding-top: 16px;
+  border-top: 1px solid var(--rule);
+  flex-wrap: wrap;
+}
+
+.meta-item {
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-light);
+}
+
+.meta-item span { color: var(--ink-mid); }
+
+/* ── STAT STRIP ───────────────────────────────────────────────── */
+.stat-strip {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 0 40px;
+}
+
+.stat-strip-inner {
+  max-width: 860px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0;
+}
+
+.strip-stat {
+  padding: 24px 0;
+  border-right: 1px solid #333;
+  padding-right: 24px;
+  padding-left: 24px;
+}
+
+.strip-stat:first-child { padding-left: 0; }
+.strip-stat:last-child { border-right: none; }
+
+.strip-num {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 30px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+  letter-spacing: -1px;
+}
+
+.strip-num .accent { color: #e8a020; }
+
+.strip-lbl {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #888;
+  margin-top: 5px;
+  line-height: 1.4;
+}
+
+/* ── ARTICLE BODY ─────────────────────────────────────────────── */
+.article-body {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+/* Section headings */
+.section-hed {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.3px;
+  margin: 48px 0 16px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--ink);
+}
+
+.section-sub {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-light);
+  margin: 28px 0 10px;
+}
+
+/* Body text */
+.prose {
+  font-size: 16px;
+  line-height: 1.85;
+  color: var(--ink-mid);
+  margin-bottom: 18px;
+}
+
+.prose strong { color: var(--ink); font-weight: 600; }
+
+.prose.drop-cap::first-letter {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 72px;
+  font-weight: 700;
+  float: left;
+  line-height: 0.82;
+  margin: 6px 10px 0 0;
+  color: var(--ink);
+}
+
+/* Pull quote */
+.pull-quote {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 20px;
+  font-style: italic;
+  line-height: 1.4;
+  color: var(--ink);
+  border-top: 3px solid var(--ink);
+  border-bottom: 1px solid var(--rule);
+  padding: 20px 40px;
+  margin: 36px 0;
+  text-align: center;
+}
+
+/* ── DATA CALLOUT BOXES ───────────────────────────────────────── */
+.callout-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1px;
+  background: var(--rule);
+  border: 1px solid var(--rule);
+  margin: 32px 0;
+}
+
+.callout {
+  background: var(--surface);
+  padding: 24px;
+}
+
+.callout-num {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1;
+  letter-spacing: -1px;
+}
+
+.callout-num.red { color: var(--accent); }
+
+.callout-label {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-light);
+  margin-top: 6px;
+  line-height: 1.5;
+}
+
+.callout-desc {
+  font-size: 12px;
+  color: var(--ink-mid);
+  font-style: italic;
+  margin-top: 8px;
+  line-height: 1.5;
+}
+
+/* ── INLINE CHARTS ────────────────────────────────────────────── */
+.chart-block {
+  margin: 36px 0;
+  border: 1px solid var(--rule);
+  background: var(--surface);
+}
+
+.chart-header {
+  padding: 14px 20px;
+  border-bottom: 2px solid var(--ink);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.chart-title {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.2px;
+}
+
+.chart-note {
+  font-size: 10px;
+  color: var(--ink-light);
+  font-style: italic;
+  letter-spacing: 0.04em;
+}
+
+.chart-body {
+  padding: 20px;
+}
+
+.chart-footer {
+  padding: 8px 20px;
+  border-top: 1px solid var(--rule);
+  font-size: 10px;
+  color: var(--ink-light);
+  font-style: italic;
+  letter-spacing: 0.04em;
+}
+
+svg text { font-family: 'Source Serif 4', serif; }
+
+/* ── TECH STACK TABLE ─────────────────────────────────────────── */
+.tech-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 24px 0;
+  font-size: 14px;
+}
+
+.tech-table th {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: var(--surface2);
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 2px solid var(--ink);
+}
+
+.tech-table td {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--rule);
+  color: var(--ink-mid);
+  vertical-align: top;
+}
+
+.tech-table tr:hover td { background: var(--surface); }
+
+.tech-table td:first-child {
+  font-weight: 600;
+  color: var(--ink);
+  width: 160px;
+}
+
+.tech-tag {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1px solid var(--rule-heavy);
+  padding: 2px 7px;
+  color: var(--ink-mid);
+  margin: 2px 2px 2px 0;
+}
+
+/* ── CHALLENGE BLOCKS ─────────────────────────────────────────── */
+.challenge-list {
+  margin: 24px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.challenge-item {
+  background: var(--surface);
+  border-left: 3px solid var(--ink);
+  padding: 20px 24px;
+}
+
+.challenge-item.solved { border-color: var(--accent); }
+
+.challenge-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-light);
+  margin-bottom: 6px;
+}
+
+.challenge-label.solved { color: var(--accent); }
+
+.challenge-title {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+
+.challenge-body {
+  font-size: 13px;
+  color: var(--ink-mid);
+  line-height: 1.7;
+}
+
+/* ── FINDINGS ─────────────────────────────────────────────────── */
+.finding-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--rule);
+  border: 1px solid var(--rule);
+  margin: 24px 0;
+}
+
+.finding {
+  background: var(--paper);
+  padding: 24px;
+}
+
+.finding-num {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+}
+
+.finding-title {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+.finding-body {
+  font-size: 13px;
+  color: var(--ink-mid);
+  line-height: 1.7;
+}
+
+/* ── CTA ──────────────────────────────────────────────────────── */
+.article-cta {
+  border-top: 3px double var(--rule);
+  border-bottom: 3px double var(--rule);
+  padding: 32px 0;
+  margin: 48px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.cta-text {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 20px;
+  font-style: italic;
+  color: var(--ink);
+}
+
+.cta-links { display: flex; gap: 12px; flex-wrap: wrap; }
+
+.btn {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 12px 24px;
+  text-decoration: none;
+  transition: all 0.15s;
+  border: 1px solid var(--ink);
+}
+
+.btn-primary { background: var(--ink); color: var(--paper); }
+.btn-primary:hover { background: var(--accent); border-color: var(--accent); }
+.btn-secondary { color: var(--ink); }
+.btn-secondary:hover { background: var(--ink); color: var(--paper); }
+
+/* ── RELATED PROJECTS ─────────────────────────────────────────── */
+.related-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--rule);
+  border: 1px solid var(--rule);
+  margin: 0 0 60px;
+}
+
+.related-card {
+  background: var(--paper);
+  padding: 24px;
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.15s;
+  display: block;
+}
+
+.related-card:hover { background: var(--surface); }
+
+.related-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+
+.related-title {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.3;
+  margin-bottom: 6px;
+}
+
+.related-desc {
+  font-size: 12px;
+  color: var(--ink-mid);
+  font-style: italic;
+  line-height: 1.55;
+}
+
+/* ── FOOTER ───────────────────────────────────────────────────── */
+footer {
+  border-top: 3px double var(--ink);
+  padding: 18px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footer-logo {
+  font-family: 'UnifrakturMaguntia', cursive;
+  font-size: 22px;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.footer-note {
+  font-size: 11px;
+  color: var(--ink-light);
+}
+
+/* ── AXIS STYLES ──────────────────────────────────────────────── */
+.axis path, .axis line { stroke: var(--rule-heavy); }
+.axis text { fill: var(--ink-light); font-size: 11px; }
+.grid line { stroke: var(--rule); stroke-dasharray: 3,3; }
+.grid path { stroke: none; }
+
+/* ── REVEAL ───────────────────────────────────────────────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.reveal.visible { opacity: 1; transform: none; }
+
+/* ── RESPONSIVE ───────────────────────────────────────────────── */
+@media (max-width: 700px) {
+  .stat-strip-inner { grid-template-columns: repeat(2, 1fr); }
+  .callout-grid { grid-template-columns: 1fr; }
+  .finding-grid { grid-template-columns: 1fr; }
+  .related-grid { grid-template-columns: 1fr; }
+  .article-header, .article-body { padding: 32px 20px 0; }
+  .stat-strip { padding: 0 20px; }
+  .strip-stat:first-child { padding-left: 20px; }
+}
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--paper); }
+::-webkit-scrollbar-thumb { background: var(--rule); }
+</style>
+</head>
+<body>
+
+<!-- MASTHEAD -->
+<div class="masthead">
+  <a href="../index.html" class="masthead-logo">The Alx Report</a>
+  <div>Case Study</div>
+  <a href="../index.html" class="masthead-back">← Back to Portfolio</a>
+</div>
+
+<!-- ARTICLE HEADER -->
+<div class="article-header reveal">
+  <div class="article-section-tag">Project Case Study · Data Visualisation</div>
+  <h1 class="article-hed">BC Public Sector Salary Intelligence Dashboard</h1>
+  <p class="article-dek">How 60,000 rows of government salary data became an interactive public accountability tool — built with D3.js, Python, and BC open data.</p>
+  <div class="article-meta">
+    <div class="meta-item">By <span>Alx</span></div>
+    <div class="meta-item">Year <span>2024–25</span></div>
+    <div class="meta-item">Tools <span>D3.js · Python · pandas</span></div>
+    <div class="meta-item">Data <span>Vancouver Sun PSSDB · BC Open Data</span></div>
+    <div class="meta-item">Status <span style="color: var(--accent);">Live</span></div>
+  </div>
+</div>
+
+<!-- STAT STRIP -->
+<div class="stat-strip reveal">
+  <div class="stat-strip-inner">
+    <div class="strip-stat">
+      <div class="strip-num">59<span class="accent">,</span>858</div>
+      <div class="strip-lbl">Salary Records</div>
+    </div>
+    <div class="strip-stat">
+      <div class="strip-num">6</div>
+      <div class="strip-lbl">Sector Classifications</div>
+    </div>
+    <div class="strip-stat">
+      <div class="strip-num">60</div>
+      <div class="strip-lbl">Organisations</div>
+    </div>
+    <div class="strip-stat">
+      <div class="strip-num">$91<span class="accent">K</span></div>
+      <div class="strip-lbl">Median Salary FY17/18</div>
+    </div>
+    <div class="strip-stat">
+      <div class="strip-num">$865<span class="accent">K</span></div>
+      <div class="strip-lbl">Highest Earner</div>
+    </div>
+  </div>
+</div>
+
+<!-- ARTICLE BODY -->
+<div class="article-body">
+
+  <!-- OVERVIEW -->
+  <div class="section-hed reveal">Project Overview &amp; Goals</div>
+
+  <p class="prose drop-cap reveal">British Columbia's public sector employs hundreds of thousands of people across health authorities, crown corporations, school districts, universities, municipalities, and government ministries. Every year, the province publishes salary data for all public servants earning above $75,000 — but the raw data, buried in PDFs and government portals, is nearly impossible for the average person to interrogate.</p>
+
+  <p class="prose reveal">The goal of this project was to turn that raw transparency data into a genuinely useful analytical tool. Not just a searchable table, but a dashboard that answers real questions: <strong>Which sectors pay the most? Which organisations lead their peer group? What does a Nurse Practitioner at Fraser Health earn compared to one at Interior Health? Where does a given individual rank within their organisation?</strong></p>
+
+  <div class="callout-grid reveal">
+    <div class="callout">
+      <div class="callout-num red">4</div>
+      <div class="callout-label">Dashboard Pages</div>
+      <div class="callout-desc">Overview, Organisations, Roles, and Individual Search</div>
+    </div>
+    <div class="callout">
+      <div class="callout-num">$75K</div>
+      <div class="callout-label">Minimum Threshold</div>
+      <div class="callout-desc">BC's statutory disclosure threshold for public sector salaries</div>
+    </div>
+    <div class="callout">
+      <div class="callout-num">FY17/18</div>
+      <div class="callout-label">Dataset Period</div>
+      <div class="callout-desc">Vancouver Sun PSSDB — expandable to multi-year with same pipeline</div>
+    </div>
+  </div>
+
+  <p class="prose reveal">The dashboard was designed as a portfolio project but built to production standards — with real data, real analytical depth, and the kind of interaction model that would make sense to a journalist, researcher, HR professional, or curious member of the public.</p>
+
+  <!-- DATA & METHODOLOGY -->
+  <div class="section-hed reveal">Data Sources &amp; Methodology</div>
+
+  <p class="prose reveal">The primary data source is the <strong>Vancouver Sun's Public Sector Salary Database (PSSDB)</strong>, which aggregates salary disclosure data from BC public sector organisations into a single cleaned dataset. The underlying data originates from BC government public accounts and individual organisation disclosures under the Financial Information Act.</p>
+
+  <div class="section-sub reveal">Data Schema</div>
+
+  <table class="tech-table reveal">
+    <thead>
+      <tr>
+        <th>Column</th>
+        <th>Description</th>
+        <th>Coverage</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Agency</td>
+        <td>Organisation name (e.g. Fraser Health, BC Hydro)</td>
+        <td>60 organisations</td>
+      </tr>
+      <tr>
+        <td>Name</td>
+        <td>Employee full name — last, first format</td>
+        <td>~4% null (undisclosed)</td>
+      </tr>
+      <tr>
+        <td>Position</td>
+        <td>Job title — messy, 9,262 unique values</td>
+        <td>~12% null in FY17/18</td>
+      </tr>
+      <tr>
+        <td>Department</td>
+        <td>Internal department name</td>
+        <td>~53% null — not used</td>
+      </tr>
+      <tr>
+        <td>Remuneration</td>
+        <td>Annual salary in CAD</td>
+        <td>34 nulls dropped</td>
+      </tr>
+      <tr>
+        <td>Expenses</td>
+        <td>Annual expense claims</td>
+        <td>Not used in dashboard</td>
+      </tr>
+      <tr>
+        <td>Year</td>
+        <td>Fiscal year (2017/18, 2018, 2017)</td>
+        <td>Filtered to 2017/18</td>
+      </tr>
+      <tr>
+        <td>Sector</td>
+        <td>Classification (Health Authority, Crown Corp., etc.)</td>
+        <td>6 sectors</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="section-sub reveal">Python Preprocessing Pipeline</div>
+
+  <p class="prose reveal">Raw CSV data required several preprocessing steps before it could power the dashboard. A Python script handled all transformation, producing a precomputed JSON payload structured for fast browser rendering.</p>
+
+  <div class="challenge-list reveal">
+    <div class="challenge-item">
+      <div class="challenge-label">Step 1</div>
+      <div class="challenge-title">Data Cleaning &amp; Type Coercion</div>
+      <div class="challenge-body">Remuneration column had mixed types (float and string) across rows — coerced to numeric with <code>pd.to_numeric(errors='coerce')</code>. 34 null salary rows dropped. Position nulls filled with "Unknown".</div>
+    </div>
+    <div class="challenge-item">
+      <div class="challenge-label">Step 2</div>
+      <div class="challenge-title">Year Filtering</div>
+      <div class="challenge-body">Dataset contains three year formats (2017/18, 2018, 2017) from different reporting periods. Filtered to 2017/18 as the primary fiscal year, yielding 59,858 clean records from 93,276 total rows.</div>
+    </div>
+    <div class="challenge-item">
+      <div class="challenge-label">Step 3</div>
+      <div class="challenge-title">Aggregate Precomputation</div>
+      <div class="challenge-body">All histogram bins, salary band counts, sector medians, organisation aggregates, and role aggregates precomputed in Python using pandas groupby and d3-compatible bin structures. Avoids heavy computation in the browser.</div>
+    </div>
+    <div class="challenge-item">
+      <div class="challenge-label">Step 4</div>
+      <div class="challenge-title">Percentile Ranking</div>
+      <div class="challenge-body">For each individual record, computed their salary percentile within their organisation by sorting org salary arrays and using bisection search. Each record stored with a precomputed percentile integer (0–100) for instant display in the search table.</div>
+    </div>
+  </div>
+
+  <!-- CHARTS -->
+  <div class="section-hed reveal">Key Data Findings</div>
+
+  <p class="prose reveal">The data reveals clear structural patterns in BC public sector pay — with health authorities dominating headcount, universities and crown corporations leading on median salary, and significant variation within sectors across individual organisations.</p>
+
+  <!-- CHART 1: Sector breakdown -->
+  <div class="chart-block reveal">
+    <div class="chart-header">
+      <div class="chart-title">Median Annual Salary by Sector — FY 2017/18</div>
+      <div class="chart-note">All 59,858 earners above $75,000 CAD</div>
+    </div>
+    <div class="chart-body">
+      <svg id="chart-sectors" width="100%" height="260"></svg>
+    </div>
+    <div class="chart-footer">Source: Vancouver Sun Public Sector Salary Database · FY 2017/18</div>
+  </div>
+
+  <div class="finding-grid reveal">
+    <div class="finding">
+      <div class="finding-num">Finding 01</div>
+      <div class="finding-title">Health Authorities are the largest employer — but not the highest payer</div>
+      <div class="finding-body">With 28,767 disclosures, health authorities represent nearly half of all earners in the dataset. Yet median pay sits in the middle of the sector pack — driven down by the volume of nursing staff at lower salary bands.</div>
+    </div>
+    <div class="finding">
+      <div class="finding-num">Finding 02</div>
+      <div class="finding-title">Crown corporations show the widest salary range of any sector</div>
+      <div class="finding-body">Organisations like BC Hydro and Powerex (a subsidiary) contain both mid-level engineers and C-suite executives earning $800K+, creating extreme salary dispersion within a single classification.</div>
+    </div>
+    <div class="finding">
+      <div class="finding-num">Finding 03</div>
+      <div class="finding-title">Police departments punch above their weight on median salary</div>
+      <div class="finding-body">With only 3,003 disclosures, police departments have a compressed salary distribution — most officers cluster between $95K and $130K, yielding a relatively high median for the sector despite no executive-level outliers.</div>
+    </div>
+    <div class="finding">
+      <div class="finding-num">Finding 04</div>
+      <div class="finding-title">The $75K–$100K band contains nearly half of all earners</div>
+      <div class="finding-body">Despite the dataset covering only those earning above the disclosure threshold, the majority cluster in the first salary band — reflecting the large number of teachers, nurses, and government workers at or near the disclosure floor.</div>
+    </div>
+  </div>
+
+  <!-- CHART 2: Band distribution -->
+  <div class="chart-block reveal">
+    <div class="chart-header">
+      <div class="chart-title">Salary Band Distribution — All Sectors</div>
+      <div class="chart-note">Count of earners per band</div>
+    </div>
+    <div class="chart-body">
+      <svg id="chart-bands" width="100%" height="220"></svg>
+    </div>
+    <div class="chart-footer">Source: Vancouver Sun PSSDB · FY 2017/18 · n = 59,858</div>
+  </div>
+
+  <!-- CHART 3: Top orgs -->
+  <div class="chart-block reveal">
+    <div class="chart-header">
+      <div class="chart-title">Top 12 Organisations by Median Salary</div>
+      <div class="chart-note">Minimum 20 earners</div>
+    </div>
+    <div class="chart-body">
+      <svg id="chart-orgs" width="100%" height="300"></svg>
+    </div>
+    <div class="chart-footer">Source: Vancouver Sun PSSDB · FY 2017/18</div>
+  </div>
+
+  <!-- TECHNICAL CHALLENGES -->
+  <div class="section-hed reveal">Technical Challenges &amp; Solutions</div>
+
+  <p class="prose reveal">Building a dashboard on 60,000 records in a single HTML file required solving several real engineering problems — not just visualisation design choices.</p>
+
+  <div class="challenge-list reveal">
+    <div class="challenge-item solved">
+      <div class="challenge-label solved">Challenge → Solution</div>
+      <div class="challenge-title">Payload Size: 6MB+ data file</div>
+      <div class="challenge-body">Embedding 60K raw records inline in HTML created an 11MB file with a multi-second blank screen on load. Solution: serve as a separate <code>data.json</code> file via GitHub Pages, which gzips automatically to ~1.2MB over the wire. The HTML fetches it asynchronously so the page skeleton renders immediately.</div>
+    </div>
+    <div class="challenge-item solved">
+      <div class="challenge-label solved">Challenge → Solution</div>
+      <div class="challenge-title">9,262 Unique Role Titles</div>
+      <div class="challenge-body">BC public sector position titles are completely unstandardised — "B1_Nurse Direct Patient Care level 3", "BCNU DC1 Nurse Upp", and "Registered Nurse Critical Care" are all distinct values for what is broadly the same role. The dashboard surfaces raw titles with minimum-headcount filtering rather than attempting normalisation, which would require ML classification or a manual taxonomy.</div>
+    </div>
+    <div class="challenge-item solved">
+      <div class="challenge-label solved">Challenge → Solution</div>
+      <div class="challenge-title">Real-Time Search on 60K Records</div>
+      <div class="challenge-body">Filtering 60,000 records on every keystroke risks UI freezes. Solution: precomputed compact search index with short key names (<code>n, o, c, r, s, p</code>) reduces memory footprint. Search uses simple <code>Array.filter()</code> with <code>String.includes()</code> — fast enough at 60K rows without needing a search index library.</div>
+    </div>
+    <div class="challenge-item solved">
+      <div class="challenge-label solved">Challenge → Solution</div>
+      <div class="challenge-title">Mixed Data Types in Source CSV</div>
+      <div class="challenge-body">The Remuneration column contained mixed string/float types across rows, causing pandas DtypeWarning and silent NaN coercion. Fixed with explicit <code>low_memory=False</code> and <code>pd.to_numeric(errors='coerce')</code> followed by null-row removal.</div>
+    </div>
+  </div>
+
+  <div class="pull-quote reveal">"The hardest part wasn't building the charts — it was making 60,000 rows feel fast."</div>
+
+  <!-- TECH STACK -->
+  <div class="section-hed reveal">Tools &amp; Tech Stack</div>
+
+  <table class="tech-table reveal">
+    <thead>
+      <tr>
+        <th>Layer</th>
+        <th>Tool</th>
+        <th>Purpose</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Data Processing</td>
+        <td><span class="tech-tag">Python 3</span><span class="tech-tag">pandas</span></td>
+        <td>CSV cleaning, type coercion, aggregate precomputation, percentile ranking, JSON export</td>
+      </tr>
+      <tr>
+        <td>Visualisation</td>
+        <td><span class="tech-tag">D3.js v7</span></td>
+        <td>All charts — histogram, bar charts, scatter plot. Scales, axes, transitions, tooltips</td>
+      </tr>
+      <tr>
+        <td>Frontend</td>
+        <td><span class="tech-tag">HTML5</span><span class="tech-tag">CSS3</span><span class="tech-tag">Vanilla JS</span></td>
+        <td>Single-file dashboard, search/filter logic, page navigation, responsive layout</td>
+      </tr>
+      <tr>
+        <td>Data Source</td>
+        <td><span class="tech-tag">Vancouver Sun PSSDB</span><span class="tech-tag">BC Open Data</span></td>
+        <td>Primary salary dataset — FY 2017/18 — 93,276 raw rows</td>
+      </tr>
+      <tr>
+        <td>Hosting</td>
+        <td><span class="tech-tag">GitHub Pages</span></td>
+        <td>Static hosting with automatic gzip compression. Zero cost, version-controlled</td>
+      </tr>
+      <tr>
+        <td>Typography</td>
+        <td><span class="tech-tag">DM Serif Display</span><span class="tech-tag">DM Mono</span></td>
+        <td>Google Fonts — editorial serif display with monospace body for data density</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- CTA -->
+  <div class="article-cta reveal">
+    <div class="cta-text">Explore the live dashboard →</div>
+    <div class="cta-links">
+      <a href="../bc-salary/dashboard.html" class="btn btn-primary">Open Dashboard</a>
+      <a href="https://github.com/yourusername/your-repo" target="_blank" class="btn btn-secondary">View on GitHub</a>
+    </div>
+  </div>
+
+  <!-- RELATED -->
+  <div class="section-hed reveal">Related Projects</div>
+
+  <div class="related-grid reveal">
+    <a href="./supplier-intelligence.html" class="related-card">
+      <div class="related-label">Power BI · Multi-Org</div>
+      <div class="related-title">BC Supplier Intelligence Dashboard</div>
+      <div class="related-desc">BC Hydro, TransLink, PHSA &amp; BCIT vendor spend unified from SOFI PDF reports.</div>
+    </a>
+    <a href="./ubc-supplier.html" class="related-card">
+      <div class="related-label">Power BI · University</div>
+      <div class="related-title">UBC Supplier Intelligence</div>
+      <div class="related-desc">FY2021–2025 vendor payment analysis across UBC SOFI reports. 6,700+ rows, 9 categories.</div>
+    </a>
+    <a href="./bc-housing.html" class="related-card">
+      <div class="related-label">Power BI · Research</div>
+      <div class="related-title">BC Housing Research Dashboard</div>
+      <div class="related-desc">Are we building enough housing in BC? 29 regional districts, four-phase framework.</div>
+    </a>
+  </div>
+
+</div><!-- end article-body -->
+
+<!-- FOOTER -->
+<footer>
+  <a href="../index.html" class="footer-logo">The Alx Report</a>
+  <div class="footer-note">Vancouver, BC · 2025 · Data &amp; Analytics Portfolio</div>
+</footer>
+
+<script>
+// ── DATA ────────────────────────────────────────────────────────
+const sectors = [
+  {label:'Universities & Colleges', median:108500, count:13674},
+  {label:'Crown Corp. & Other',     median:104200, count:12430},
+  {label:'Police Departments',      median:101800, count:3003},
+  {label:'Government',              median:95400,  count:23467},
+  {label:'Health Authorities',      median:91200,  count:28767},
+  {label:'School Districts',        median:88600,  count:11935},
+];
+
+const bands = [
+  {label:'$75K–$100K',  count:28950},
+  {label:'$100K–$150K', count:22410},
+  {label:'$150K–$200K', count:5280},
+  {label:'$200K–$300K', count:2460},
+  {label:'$300K+',      count:758},
+];
+
+const orgs = [
+  {org:'Powerex Corporation',           median:198000},
+  {org:'BC Hydro and Power Authority',  median:141000},
+  {org:'Translink',                     median:132000},
+  {org:'University of British Columbia',median:126000},
+  {org:'ICBC',                          median:122000},
+  {org:'Simon Fraser University',       median:119000},
+  {org:'BC Lottery Corporation',        median:116000},
+  {org:'PHSA',                          median:112000},
+  {org:'City of Vancouver',             median:109000},
+  {org:'Vancouver Coastal Health',      median:96000},
+  {org:'Fraser Health',                 median:93000},
+  {org:'Provincial Government',         median:91000},
+].sort((a,b) => b.median - a.median);
+
+const fmtK = v => '$' + d3.format(',.0f')(v/1000) + 'K';
+const fmt  = d3.format('$,.0f');
+
+// Tooltip
+const tip = document.createElement('div');
+Object.assign(tip.style, {
+  position:'fixed', background:'#1a1a1a', color:'#f0ede8',
+  padding:'10px 14px', fontSize:'12px', borderRadius:'2px',
+  pointerEvents:'none', opacity:'0', transition:'opacity 0.12s',
+  zIndex:'999', fontFamily:"'Source Serif 4', serif", lineHeight:'1.6',
+  maxWidth:'220px'
+});
+document.body.appendChild(tip);
+
+function showTip(html, e) {
+  tip.innerHTML = html;
+  tip.style.opacity = '1';
+  moveTip(e);
+}
+function moveTip(e) {
+  tip.style.left = Math.min(e.clientX+14, window.innerWidth-230)+'px';
+  tip.style.top  = (e.clientY-10)+'px';
+}
+function hideTip() { tip.style.opacity = '0'; }
+
+// ── CHART 1: SECTORS ─────────────────────────────────────────────
+function drawSectors() {
+  const el = document.getElementById('chart-sectors');
+  const W  = el.parentElement.clientWidth - 40;
+  const H  = 260;
+  const mg = {top:10, right:70, bottom:30, left:200};
+
+  const svg = d3.select('#chart-sectors')
+    .attr('viewBox', `0 0 ${W} ${H}`)
+    .attr('width', '100%').attr('height', H);
+
+  const x = d3.scaleLinear()
+    .domain([80000, d3.max(sectors, d=>d.median)*1.05])
+    .range([mg.left, W-mg.right]).nice();
+
+  const y = d3.scaleBand()
+    .domain(sectors.map(d=>d.label))
+    .range([mg.top, H-mg.bottom]).padding(0.28);
+
+  // grid
+  svg.append('g').attr('class','grid')
+    .attr('transform',`translate(0,${mg.top})`)
+    .call(d3.axisTop(x).tickSize(H-mg.top-mg.bottom).tickFormat(''))
+    .call(g => { g.select('.domain').remove(); });
+
+  // bars
+  svg.selectAll('rect').data(sectors).join('rect')
+    .attr('x', mg.left)
+    .attr('y', d => y(d.label))
+    .attr('height', y.bandwidth())
+    .attr('width', d => x(d.median)-mg.left)
+    .attr('fill', (d,i) => i===0 ? '#c0001a' : '#333')
+    .attr('opacity', (d,i) => 1 - i*0.1)
+    .on('mouseover', (e,d) => showTip(
+      `<strong>${d.label}</strong><br>Median: ${fmt(d.median)}<br>Earners: ${d3.format(',')(d.count)}`, e))
+    .on('mousemove', moveTip).on('mouseleave', hideTip);
+
+  // value labels
+  svg.selectAll('.vlbl').data(sectors).join('text').attr('class','vlbl')
+    .attr('x', d => x(d.median)+6)
+    .attr('y', d => y(d.label)+y.bandwidth()/2+4)
+    .attr('fill','#888').attr('font-size',11)
+    .text(d => fmtK(d.median));
+
+  // axes
+  svg.append('g').attr('class','axis')
+    .attr('transform',`translate(0,${H-mg.bottom})`)
+    .call(d3.axisBottom(x).tickFormat(fmtK).ticks(5));
+  svg.append('g').attr('class','axis')
+    .attr('transform',`translate(${mg.left},0)`)
+    .call(d3.axisLeft(y).tickSize(0))
+    .call(g => g.select('.domain').remove());
+}
+
+// ── CHART 2: BANDS ───────────────────────────────────────────────
+function drawBands() {
+  const el = document.getElementById('chart-bands');
+  const W  = el.parentElement.clientWidth - 40;
+  const H  = 220;
+  const mg = {top:10, right:70, bottom:30, left:110};
+
+  const colors = ['#c0001a','#8a2020','#555','#888','#bbb'];
+
+  const svg = d3.select('#chart-bands')
+    .attr('viewBox',`0 0 ${W} ${H}`)
+    .attr('width','100%').attr('height',H);
+
+  const x = d3.scaleLinear()
+    .domain([0, d3.max(bands, d=>d.count)*1.05])
+    .range([mg.left, W-mg.right]).nice();
+
+  const y = d3.scaleBand()
+    .domain(bands.map(d=>d.label))
+    .range([mg.top, H-mg.bottom]).padding(0.25);
+
+  svg.selectAll('rect').data(bands).join('rect')
+    .attr('x', mg.left)
+    .attr('y', d => y(d.label))
+    .attr('height', y.bandwidth())
+    .attr('width', d => x(d.count)-mg.left)
+    .attr('fill', (d,i) => colors[i])
+    .on('mouseover',(e,d) => showTip(
+      `<strong>${d.label}</strong><br>Earners: ${d3.format(',')(d.count)}<br>${Math.round(d.count/59858*100)}% of total`, e))
+    .on('mousemove',moveTip).on('mouseleave',hideTip);
+
+  svg.selectAll('.blbl').data(bands).join('text').attr('class','blbl')
+    .attr('x', d => x(d.count)+6)
+    .attr('y', d => y(d.label)+y.bandwidth()/2+4)
+    .attr('fill','#888').attr('font-size',11)
+    .text(d => d3.format(',')(d.count));
+
+  svg.append('g').attr('class','axis')
+    .attr('transform',`translate(0,${H-mg.bottom})`)
+    .call(d3.axisBottom(x).tickFormat(d3.format(',d')).ticks(5));
+  svg.append('g').attr('class','axis')
+    .attr('transform',`translate(${mg.left},0)`)
+    .call(d3.axisLeft(y).tickSize(0))
+    .call(g => g.select('.domain').remove());
+}
+
+// ── CHART 3: ORGS ────────────────────────────────────────────────
+function drawOrgs() {
+  const el = document.getElementById('chart-orgs');
+  const W  = el.parentElement.clientWidth - 40;
+  const H  = 300;
+  const mg = {top:10, right:70, bottom:30, left:220};
+
+  const svg = d3.select('#chart-orgs')
+    .attr('viewBox',`0 0 ${W} ${H}`)
+    .attr('width','100%').attr('height',H);
+
+  const x = d3.scaleLinear()
+    .domain([0, d3.max(orgs, d=>d.median)*1.05])
+    .range([mg.left, W-mg.right]).nice();
+
+  const y = d3.scaleBand()
+    .domain(orgs.map(d=>d.org))
+    .range([mg.top, H-mg.bottom]).padding(0.22);
+
+  svg.append('g').attr('class','grid')
+    .attr('transform',`translate(0,${mg.top})`)
+    .call(d3.axisTop(x).tickSize(H-mg.top-mg.bottom).tickFormat(''))
+    .call(g => g.select('.domain').remove());
+
+  svg.selectAll('rect').data(orgs).join('rect')
+    .attr('x', mg.left)
+    .attr('y', d => y(d.org))
+    .attr('height', y.bandwidth())
+    .attr('width', d => x(d.median)-mg.left)
+    .attr('fill', (d,i) => i < 3 ? '#c0001a' : '#444')
+    .attr('opacity', (d,i) => Math.max(0.5, 1-i*0.04))
+    .on('mouseover',(e,d) => showTip(
+      `<strong>${d.org}</strong><br>Median: ${fmt(d.median)}`, e))
+    .on('mousemove',moveTip).on('mouseleave',hideTip);
+
+  svg.selectAll('.olbl').data(orgs).join('text').attr('class','olbl')
+    .attr('x', d => x(d.median)+6)
+    .attr('y', d => y(d.org)+y.bandwidth()/2+4)
+    .attr('fill','#888').attr('font-size',11)
+    .text(d => fmtK(d.median));
+
+  svg.append('g').attr('class','axis')
+    .attr('transform',`translate(0,${H-mg.bottom})`)
+    .call(d3.axisBottom(x).tickFormat(fmtK).ticks(5));
+  svg.append('g').attr('class','axis')
+    .attr('transform',`translate(${mg.left},0)`)
+    .call(d3.axisLeft(y).tickSize(0))
+    .call(g => g.select('.domain').remove());
+}
+
+// ── INIT ─────────────────────────────────────────────────────────
+window.addEventListener('load', () => {
+  drawSectors();
+  drawBands();
+  drawOrgs();
+});
+
+window.addEventListener('resize', () => {
+  d3.select('#chart-sectors').selectAll('*').remove();
+  d3.select('#chart-bands').selectAll('*').remove();
+  d3.select('#chart-orgs').selectAll('*').remove();
+  drawSectors(); drawBands(); drawOrgs();
+});
+
+// Scroll reveal
+const obs = new IntersectionObserver((entries) => {
+  entries.forEach((e,i) => {
+    if (e.isIntersecting) {
+      setTimeout(() => e.target.classList.add('visible'), i*60);
+      obs.unobserve(e.target);
+    }
+  });
+}, {threshold:0.07, rootMargin:'0px 0px -20px 0px'});
+
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>

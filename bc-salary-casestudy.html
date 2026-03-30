@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About — The Alx Report</title>
+<link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,300;1,8..60,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper:#f7f4ef; --ink:#121212; --ink-mid:#444; --ink-light:#888;
+  --ink-xlight:#bbb; --rule:#d0cbc4; --rule-heavy:#999; --accent:#c0001a; --surface:#eeeae3;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--paper);color:var(--ink);font-family:'Source Serif 4',Georgia,serif;font-size:15px;line-height:1.7;}
+
+.masthead{border-bottom:1px solid var(--rule);padding:10px 40px;display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--ink-light);letter-spacing:.05em;}
+.masthead-logo{font-family:'UnifrakturMaguntia',cursive;font-size:22px;color:var(--ink);text-decoration:none;}
+.masthead-back{color:var(--ink-light);text-decoration:none;font-size:11px;letter-spacing:.1em;text-transform:uppercase;transition:color .15s;}
+.masthead-back:hover{color:var(--accent);}
+
+.page-wrap{max-width:900px;margin:0 auto;padding:0 40px;}
+
+.article-header{padding:48px 0 32px;border-bottom:3px double var(--rule);}
+.kicker{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.kicker::before{content:'';display:block;width:24px;height:2px;background:var(--accent);}
+.article-hed{font-family:'Libre Baskerville',serif;font-size:clamp(32px,5vw,60px);font-weight:700;line-height:1.05;letter-spacing:-1.5px;color:var(--ink);margin-bottom:14px;}
+.article-dek{font-family:'Libre Baskerville',serif;font-size:18px;font-style:italic;color:var(--ink-mid);line-height:1.5;margin-bottom:20px;}
+.article-meta{display:flex;gap:20px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-light);padding-top:16px;border-top:1px solid var(--rule);flex-wrap:wrap;}
+.article-meta span{color:var(--ink-mid);}
+
+.section-hed{font-family:'Libre Baskerville',serif;font-size:20px;font-weight:700;color:var(--ink);letter-spacing:-.3px;margin:48px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--ink);}
+.prose{font-size:16px;line-height:1.85;color:var(--ink-mid);margin-bottom:18px;}
+.prose strong{color:var(--ink);font-weight:600;}
+.prose.drop-cap::first-letter{font-family:'Libre Baskerville',serif;font-size:72px;font-weight:700;float:left;line-height:.82;margin:6px 10px 0 0;color:var(--ink);}
+
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:48px;margin:32px 0;}
+.col-hed{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--ink);border-bottom:2px solid var(--ink);padding-bottom:6px;margin-bottom:16px;}
+
+.row-list{list-style:none;}
+.row-list li{font-size:13px;color:var(--ink-mid);padding:9px 0;border-bottom:1px solid var(--rule);display:flex;justify-content:space-between;align-items:center;}
+.row-list li:last-child{border-bottom:none;}
+.badge{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:2px 6px;}
+.badge.earned{color:var(--accent);border:1px solid var(--accent);}
+.badge.progress{color:var(--ink-xlight);border:1px solid var(--ink-xlight);}
+.badge.adv{color:var(--ink-mid);border:1px solid var(--rule-heavy);}
+
+.timeline{list-style:none;}
+.tl-item{padding:14px 0 14px 18px;border-bottom:1px solid var(--rule);position:relative;}
+.tl-item:last-child{border-bottom:none;}
+.tl-item::before{content:'◆';position:absolute;left:0;top:16px;font-size:6px;color:var(--accent);}
+.tl-date{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-light);margin-bottom:3px;}
+.tl-title{font-family:'Libre Baskerville',serif;font-size:15px;font-weight:700;color:var(--ink);margin-bottom:2px;}
+.tl-org{font-size:13px;font-style:italic;color:var(--ink-mid);margin-bottom:4px;}
+.tl-desc{font-size:13px;color:var(--ink-mid);line-height:1.65;}
+
+.pull-quote{font-family:'Libre Baskerville',serif;font-size:20px;font-style:italic;line-height:1.4;color:var(--ink);border-top:3px solid var(--ink);border-bottom:1px solid var(--rule);padding:20px 40px;margin:36px 0;text-align:center;}
+
+.contact-strip{border-top:3px double var(--rule);border-bottom:3px double var(--rule);padding:28px 0;margin:48px 0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;}
+.contact-strip-text{font-family:'Libre Baskerville',serif;font-size:18px;font-style:italic;color:var(--ink);}
+.contact-links{display:flex;gap:12px;flex-wrap:wrap;}
+.btn{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:11px 22px;text-decoration:none;transition:all .15s;border:1px solid var(--ink);}
+.btn-primary{background:var(--ink);color:var(--paper);}
+.btn-primary:hover{background:var(--accent);border-color:var(--accent);}
+.btn-secondary{color:var(--ink);}
+.btn-secondary:hover{background:var(--ink);color:var(--paper);}
+
+footer{border-top:3px double var(--ink);padding:18px 40px;display:flex;justify-content:space-between;align-items:center;}
+.footer-logo{font-family:'UnifrakturMaguntia',cursive;font-size:22px;color:var(--ink);text-decoration:none;}
+.footer-note{font-size:11px;color:var(--ink-light);}
+
+.reveal{opacity:0;transform:translateY(12px);transition:opacity .5s ease,transform .5s ease;}
+.reveal.visible{opacity:1;transform:none;}
+
+@media(max-width:700px){
+  .two-col{grid-template-columns:1fr;}
+  .page-wrap{padding:0 20px;}
+  .masthead{padding:10px 20px;}
+  footer{padding:18px 20px;}
+  .contact-strip{flex-direction:column;align-items:flex-start;}
+}
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:var(--paper);}
+::-webkit-scrollbar-thumb{background:var(--rule);}
+</style>
+</head>
+<body>
+
+<div class="masthead">
+  <a href="./index.html" class="masthead-logo">The Alx Report</a>
+  <div>About</div>
+  <a href="./index.html" class="masthead-back">← Back to Portfolio</a>
+</div>
+
+<div class="page-wrap">
+
+  <div class="article-header reveal">
+    <div class="kicker">About the Analyst</div>
+    <h1 class="article-hed">Making BC's Public Data Legible, One Dataset at a Time</h1>
+    <p class="article-dek">Vancouver-based data analyst. UBC MBAn. Power BI &amp; Tableau certified. Builder of things that turn complex government data into clear decisions.</p>
+    <div class="article-meta">
+      <div>Location <span>Vancouver, BC</span></div>
+      <div>Education <span>UBC Master of Business Analytics, 2024</span></div>
+      <div>Status <span style="color:var(--accent)">Open to Analyst Roles</span></div>
+    </div>
+  </div>
+
+  <div class="section-hed reveal">Background</div>
+
+  <p class="prose drop-cap reveal">I'm a Vancouver-based data analyst with a Master of Business Analytics from UBC and a deep focus on British Columbia's public sector data ecosystem. My work sits at the intersection of technical rigour and clear communication — building dashboards and analytical tools that don't just show numbers, but make them matter to the people who rely on them.</p>
+
+  <p class="prose reveal">I'm drawn to public sector data — housing, transit, health, education, compensation — because the stakes are real. These are systems that affect hundreds of thousands of British Columbians, and the data that describes them is publicly available but rarely made accessible. My portfolio is an attempt to change that, one project at a time.</p>
+
+  <div class="pull-quote reveal">"The data exists. The question is whether anyone has made it legible."</div>
+
+  <p class="prose reveal">My technical toolkit spans the full analytics stack: Python and pandas for data extraction and pipeline engineering, Power BI and DAX for semantic model development, D3.js for custom interactive visualisation, and SQL for data wrangling. I've built automated PDF extraction pipelines using pdfplumber, vendor enrichment systems using the Claude API and BC Registry data, and GitHub Actions pipelines for scheduled data refreshes.</p>
+
+  <p class="prose reveal">Currently pursuing PMP and ECBA certifications to complement the technical side with structured project management and business analysis frameworks — rounding out a profile suited to BC public sector and research analyst roles.</p>
+
+  <div class="section-hed reveal">Skills &amp; Certifications</div>
+
+  <div class="two-col reveal">
+    <div>
+      <div class="col-hed">Technical</div>
+      <ul class="row-list">
+        <li>Power BI (PL-300) <span class="badge earned">Certified</span></li>
+        <li>Tableau Desktop <span class="badge earned">Certified</span></li>
+        <li>D3.js &amp; Chart.js <span class="badge adv">Practitioner</span></li>
+        <li>Python &amp; pandas <span class="badge adv">Practitioner</span></li>
+        <li>DAX &amp; Power Query <span class="badge adv">Advanced</span></li>
+        <li>SQL <span class="badge adv">Practitioner</span></li>
+        <li>pdfplumber / OCR <span class="badge adv">Applied</span></li>
+        <li>GitHub Actions <span class="badge adv">Applied</span></li>
+        <li>PMP <span class="badge progress">In Progress</span></li>
+        <li>ECBA <span class="badge progress">In Progress</span></li>
+      </ul>
+    </div>
+    <div>
+      <div class="col-hed">Domain Knowledge</div>
+      <ul class="row-list">
+        <li>BC Public Sector Analytics</li>
+        <li>Housing &amp; Real Estate Data</li>
+        <li>Transit &amp; Infrastructure</li>
+        <li>Health Authority Data</li>
+        <li>Vendor &amp; Spend Intelligence</li>
+        <li>Agentic AI / LLM Workflows</li>
+        <li>Data Pipeline Engineering</li>
+        <li>Public Accountability Data</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section-hed reveal">Education &amp; Experience</div>
+
+  <ul class="timeline reveal">
+    <li class="tl-item">
+      <div class="tl-date">2024 · Vancouver, BC</div>
+      <div class="tl-title">Master of Business Analytics</div>
+      <div class="tl-org">University of British Columbia (UBC)</div>
+      <div class="tl-desc">Intensive graduate programme covering data science, machine learning, BI development, and applied analytics. Built end-to-end analytical projects using Python, SQL, Power BI, and Tableau across real-world datasets.</div>
+    </li>
+    <li class="tl-item">
+      <div class="tl-date">2024–25 · Self-directed</div>
+      <div class="tl-title">Independent Analytics Researcher</div>
+      <div class="tl-org">BC Public Sector Data Projects</div>
+      <div class="tl-desc">Building a portfolio of BC public sector analytics tools using open government data — spanning salary intelligence, vendor spend analysis, housing supply research, and transit data pipelines.</div>
+    </li>
+    <li class="tl-item">
+      <div class="tl-date">2024 · Application</div>
+      <div class="tl-title">Research Analyst Candidate</div>
+      <div class="tl-org">BC Housing</div>
+      <div class="tl-desc">Built a complete application package including a four-phase housing research framework, Power BI dashboard using BC New Homes Registry data across 29 regional districts, rewritten resume, PowerPoint deck, and targeted cover email.</div>
+    </li>
+    <li class="tl-item">
+      <div class="tl-date">2024 · Earned</div>
+      <div class="tl-title">Power BI Data Analyst Associate (PL-300)</div>
+      <div class="tl-org">Microsoft Certification</div>
+    </li>
+    <li class="tl-item">
+      <div class="tl-date">2024 · Earned</div>
+      <div class="tl-title">Tableau Desktop Specialist</div>
+      <div class="tl-org">Tableau / Salesforce Certification</div>
+    </li>
+    <li class="tl-item">
+      <div class="tl-date">In Progress</div>
+      <div class="tl-title">Project Management Professional (PMP)</div>
+      <div class="tl-org">Project Management Institute (PMI)</div>
+    </li>
+    <li class="tl-item">
+      <div class="tl-date">In Progress</div>
+      <div class="tl-title">Entry Certificate in Business Analysis (ECBA)</div>
+      <div class="tl-org">International Institute of Business Analysis (IIBA)</div>
+    </li>
+  </ul>
+
+  <div class="contact-strip reveal">
+    <div class="contact-strip-text">Open to analyst roles in British Columbia.</div>
+    <div class="contact-links">
+      <a href="mailto:your@email.com" class="btn btn-primary">Email Me</a>
+      <a href="https://linkedin.com/in/yourprofile" target="_blank" class="btn btn-secondary">LinkedIn</a>
+      <a href="./resume.pdf" class="btn btn-secondary">Download CV</a>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <a href="./index.html" class="footer-logo">The Alx Report</a>
+  <div class="footer-note">Vancouver, BC · 2025 · Data &amp; Analytics Portfolio</div>
+</footer>
+
+<script>
+const obs = new IntersectionObserver((entries) => {
+  entries.forEach((e,i) => {
+    if(e.isIntersecting){ setTimeout(()=>e.target.classList.add('visible'),i*60); obs.unobserve(e.target); }
+  });
+},{threshold:0.07,rootMargin:'0px 0px -20px 0px'});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>
